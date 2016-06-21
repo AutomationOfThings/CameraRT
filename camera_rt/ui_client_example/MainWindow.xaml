@@ -3,10 +3,16 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity" 
         xmlns:local="clr-namespace:ui_client_example"
         mc:Ignorable="d"
         Title="MainWindow" Height="350" Width="525">
     <Grid>
-        <Button Width="62" Height="40" Content="Discover" Command="{Binding DiscoverCommand}" Margin="-10,-10,10,10"></Button>
+        <Button Width="Auto" Height="Auto" Content="Discover" Command="{Binding DiscoverCommand}" Margin="45,22,410,257" ></Button>
+        <Button Height="Auto" Content="GetStreamURI" Command="{Binding GetStreamUriCommand}" Margin="45,83,355,174"/>
+        <ComboBox Width="Auto" Height="Auto" DataContext="{Binding}" IsSynchronizedWithCurrentItem="True"
+                  SelectedIndex="{Binding SelectedCamera, Mode=TwoWay}"  
+                  ItemsSource="{Binding CameraList}" Margin="167,94,262,185" />
+        <TextBlock Width="82" Height="40" Text="{Binding StreamUri}" Margin="260,94,175,185"/>
     </Grid>
 </Window>

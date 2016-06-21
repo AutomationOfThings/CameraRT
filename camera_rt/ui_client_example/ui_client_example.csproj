@@ -35,13 +35,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="AxInterop.XNSSDKWINDOWLib">
-      <HintPath>C:\Program Files (x86)\Samsung\XnsActiveXSDK\sample_code\Sample\C#_WPF\XNSWindowctrlAxLib\bin\AxInterop.XNSSDKWINDOWLib.dll</HintPath>
-    </Reference>
-    <Reference Include="Interop.XNSSDKWINDOWLib">
-      <HintPath>C:\Program Files (x86)\Samsung\XnsActiveXSDK\sample_code\Sample\C#_WPF\XNSWindowctrlAxLib\bin\Interop.XNSSDKWINDOWLib.dll</HintPath>
-      <EmbedInteropTypes>True</EmbedInteropTypes>
-    </Reference>
     <Reference Include="lcm">
       <HintPath>LCM\lcm.dll</HintPath>
     </Reference>
@@ -77,9 +70,6 @@
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
-    <Reference Include="XNSWindowctrlAxLib">
-      <HintPath>C:\Program Files (x86)\Samsung\XnsActiveXSDK\sample_code\Sample\C#_WPF\XNSWindowctrlAxLib\bin\XNSWindowctrlAxLib.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml">

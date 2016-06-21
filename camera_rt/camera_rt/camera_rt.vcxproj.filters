@@ -1,0 +1,80 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="RequestResponseTypes">
+      <UniqueIdentifier>{66f5e3fa-1e18-4d47-b647-02f6d4605804}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SunApiRequestResponseTypes">
+      <UniqueIdentifier>{b6673766-0a6f-4b30-bab6-1d7ad2f1208d}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="stdafx.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="targetver.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\lcm\lcm.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\lcm\lcm-cpp.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Types\DiscoveryRequest_t.hpp">
+      <Filter>RequestResponseTypes</Filter>
+    </ClInclude>
+    <ClInclude Include="Types\DiscoveryResponse_t.hpp">
+      <Filter>RequestResponseTypes</Filter>
+    </ClInclude>
+    <ClInclude Include="Types\PositionRequest_t.hpp">
+      <Filter>RequestResponseTypes</Filter>
+    </ClInclude>
+    <ClInclude Include="Types\PtzControlRequest_t.hpp">
+      <Filter>RequestResponseTypes</Filter>
+    </ClInclude>
+    <ClInclude Include="Types\StreamUriRequest_t.hpp">
+      <Filter>RequestResponseTypes</Filter>
+    </ClInclude>
+    <ClInclude Include="Types\StreamUriResponse_t.hpp">
+      <Filter>RequestResponseTypes</Filter>
+    </ClInclude>
+    <ClInclude Include="SunApiRequestResponseTypes\BroadcastTypes.h">
+      <Filter>SunApiRequestResponseTypes</Filter>
+    </ClInclude>
+    <ClInclude Include="udp_socket_provider.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="camera_rt.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="udp_socket_provider.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="lcm\lcmd.lib">
+      <Filter>Resource Files</Filter>
+    </Library>
+  </ItemGroup>
+</Project>
