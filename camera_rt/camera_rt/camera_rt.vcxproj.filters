@@ -36,28 +36,37 @@
     <ClInclude Include="..\lcm\lcm-cpp.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Types\DiscoveryRequest_t.hpp">
-      <Filter>RequestResponseTypes</Filter>
-    </ClInclude>
-    <ClInclude Include="Types\DiscoveryResponse_t.hpp">
-      <Filter>RequestResponseTypes</Filter>
-    </ClInclude>
-    <ClInclude Include="Types\PositionRequest_t.hpp">
-      <Filter>RequestResponseTypes</Filter>
-    </ClInclude>
-    <ClInclude Include="Types\PtzControlRequest_t.hpp">
-      <Filter>RequestResponseTypes</Filter>
-    </ClInclude>
-    <ClInclude Include="Types\StreamUriRequest_t.hpp">
-      <Filter>RequestResponseTypes</Filter>
-    </ClInclude>
-    <ClInclude Include="Types\StreamUriResponse_t.hpp">
-      <Filter>RequestResponseTypes</Filter>
-    </ClInclude>
     <ClInclude Include="SunApiRequestResponseTypes\BroadcastTypes.h">
       <Filter>SunApiRequestResponseTypes</Filter>
     </ClInclude>
     <ClInclude Include="udp_socket_provider.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="uri_constants.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Types\discovery_request_t.hpp">
+      <Filter>RequestResponseTypes</Filter>
+    </ClInclude>
+    <ClInclude Include="Types\discovery_response_t.hpp">
+      <Filter>RequestResponseTypes</Filter>
+    </ClInclude>
+    <ClInclude Include="Types\position_request_t.hpp">
+      <Filter>RequestResponseTypes</Filter>
+    </ClInclude>
+    <ClInclude Include="Types\position_response_t.hpp">
+      <Filter>RequestResponseTypes</Filter>
+    </ClInclude>
+    <ClInclude Include="Types\ptz_control_request_t.hpp">
+      <Filter>RequestResponseTypes</Filter>
+    </ClInclude>
+    <ClInclude Include="Types\stream_uri_request_t.hpp">
+      <Filter>RequestResponseTypes</Filter>
+    </ClInclude>
+    <ClInclude Include="Types\stream_uri_response_t.hpp">
+      <Filter>RequestResponseTypes</Filter>
+    </ClInclude>
+    <ClInclude Include="channels.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>

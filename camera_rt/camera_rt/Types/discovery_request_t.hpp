@@ -6,25 +6,15 @@
 
 #include <lcm/lcm_coretypes.h>
 
-#ifndef __PtzCamera_PtzControlRequest_t_hpp__
-#define __PtzCamera_PtzControlRequest_t_hpp__
+#ifndef __ptz_camera_discovery_request_t_hpp__
+#define __ptz_camera_discovery_request_t_hpp__
 
-#include <string>
 
-namespace PtzCamera
+namespace ptz_camera
 {
 
-class PtzControlRequest_t
+class discovery_request_t
 {
-    public:
-        std::string cameraName;
-
-        int8_t     panValue;
-
-        int8_t     tiltValue;
-
-        int8_t     zoomValue;
-
     public:
         /**
          * Encode a message into binary form.
@@ -61,7 +51,7 @@ class PtzControlRequest_t
         inline static int64_t getHash();
 
         /**
-         * Returns "PtzControlRequest_t"
+         * Returns "discovery_request_t"
          */
         inline static const char* getTypeName();
 
@@ -72,7 +62,7 @@ class PtzControlRequest_t
         inline static uint64_t _computeHash(const __lcm_hash_ptr *p);
 };
 
-int PtzControlRequest_t::encode(void *buf, int offset, int maxlen) const
+int discovery_request_t::encode(void *buf, int offset, int maxlen) const
 {
     int pos = 0, tlen;
     int64_t hash = (int64_t)getHash();
@@ -86,7 +76,7 @@ int PtzControlRequest_t::encode(void *buf, int offset, int maxlen) const
     return pos;
 }
 
-int PtzControlRequest_t::decode(const void *buf, int offset, int maxlen)
+int discovery_request_t::decode(const void *buf, int offset, int maxlen)
 {
     int pos = 0, thislen;
 
@@ -101,78 +91,40 @@ int PtzControlRequest_t::decode(const void *buf, int offset, int maxlen)
     return pos;
 }
 
-int PtzControlRequest_t::getEncodedSize() const
+int discovery_request_t::getEncodedSize() const
 {
     return 8 + _getEncodedSizeNoHash();
 }
 
-int64_t PtzControlRequest_t::getHash()
+int64_t discovery_request_t::getHash()
 {
     static int64_t hash = _computeHash(NULL);
     return hash;
 }
 
-const char* PtzControlRequest_t::getTypeName()
+const char* discovery_request_t::getTypeName()
 {
-    return "PtzControlRequest_t";
+    return "discovery_request_t";
 }
 
-int PtzControlRequest_t::_encodeNoHash(void *buf, int offset, int maxlen) const
+int discovery_request_t::_encodeNoHash(void *, int, int) const
 {
-    int pos = 0, tlen;
-
-    char* cameraName_cstr = (char*) this->cameraName.c_str();
-    tlen = __string_encode_array(buf, offset + pos, maxlen - pos, &cameraName_cstr, 1);
-    if(tlen < 0) return tlen; else pos += tlen;
-
-    tlen = __int8_t_encode_array(buf, offset + pos, maxlen - pos, &this->panValue, 1);
-    if(tlen < 0) return tlen; else pos += tlen;
-
-    tlen = __int8_t_encode_array(buf, offset + pos, maxlen - pos, &this->tiltValue, 1);
-    if(tlen < 0) return tlen; else pos += tlen;
-
-    tlen = __int8_t_encode_array(buf, offset + pos, maxlen - pos, &this->zoomValue, 1);
-    if(tlen < 0) return tlen; else pos += tlen;
-
-    return pos;
+    return 0;
 }
 
-int PtzControlRequest_t::_decodeNoHash(const void *buf, int offset, int maxlen)
+int discovery_request_t::_decodeNoHash(const void *, int, int)
 {
-    int pos = 0, tlen;
-
-    int32_t __cameraName_len__;
-    tlen = __int32_t_decode_array(buf, offset + pos, maxlen - pos, &__cameraName_len__, 1);
-    if(tlen < 0) return tlen; else pos += tlen;
-    if(__cameraName_len__ > maxlen - pos) return -1;
-    this->cameraName.assign(((const char*)buf) + offset + pos, __cameraName_len__ - 1);
-    pos += __cameraName_len__;
-
-    tlen = __int8_t_decode_array(buf, offset + pos, maxlen - pos, &this->panValue, 1);
-    if(tlen < 0) return tlen; else pos += tlen;
-
-    tlen = __int8_t_decode_array(buf, offset + pos, maxlen - pos, &this->tiltValue, 1);
-    if(tlen < 0) return tlen; else pos += tlen;
-
-    tlen = __int8_t_decode_array(buf, offset + pos, maxlen - pos, &this->zoomValue, 1);
-    if(tlen < 0) return tlen; else pos += tlen;
-
-    return pos;
+    return 0;
 }
 
-int PtzControlRequest_t::_getEncodedSizeNoHash() const
+int discovery_request_t::_getEncodedSizeNoHash() const
 {
-    int enc_size = 0;
-    enc_size += this->cameraName.size() + 4 + 1;
-    enc_size += __int8_t_encoded_array_size(NULL, 1);
-    enc_size += __int8_t_encoded_array_size(NULL, 1);
-    enc_size += __int8_t_encoded_array_size(NULL, 1);
-    return enc_size;
+    return 0;
 }
 
-uint64_t PtzControlRequest_t::_computeHash(const __lcm_hash_ptr *)
+uint64_t discovery_request_t::_computeHash(const __lcm_hash_ptr *)
 {
-    uint64_t hash = 0xc7d1d3b50e3ac11cLL;
+    uint64_t hash = 0x0000000012345678LL;
     return (hash<<1) + ((hash>>63)&1);
 }
 

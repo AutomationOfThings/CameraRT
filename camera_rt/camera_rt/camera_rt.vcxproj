@@ -54,6 +54,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>G:\camera_project\camera_rt\camera_rt\camera_rt\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -88,16 +89,19 @@
   <ItemGroup>
     <ClInclude Include="..\lcm\lcm-cpp.hpp" />
     <ClInclude Include="..\lcm\lcm.h" />
+    <ClInclude Include="channels.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="SunApiRequestResponseTypes\BroadcastTypes.h" />
     <ClInclude Include="targetver.h" />
-    <ClInclude Include="Types\DiscoveryRequest_t.hpp" />
-    <ClInclude Include="Types\DiscoveryResponse_t.hpp" />
-    <ClInclude Include="Types\PositionRequest_t.hpp" />
-    <ClInclude Include="Types\PtzControlRequest_t.hpp" />
-    <ClInclude Include="Types\StreamUriRequest_t.hpp" />
-    <ClInclude Include="Types\StreamUriResponse_t.hpp" />
+    <ClInclude Include="Types\discovery_request_t.hpp" />
+    <ClInclude Include="Types\discovery_response_t.hpp" />
+    <ClInclude Include="Types\position_request_t.hpp" />
+    <ClInclude Include="Types\position_response_t.hpp" />
+    <ClInclude Include="Types\ptz_control_request_t.hpp" />
+    <ClInclude Include="Types\stream_uri_request_t.hpp" />
+    <ClInclude Include="Types\stream_uri_response_t.hpp" />
     <ClInclude Include="udp_socket_provider.h" />
+    <ClInclude Include="uri_constants.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="camera_rt.cpp" />
@@ -122,6 +126,7 @@
     <Import Project="..\packages\cpprestsdk.v120.winxp.msvcstl.dyn.rt-dyn.2.8.0\build\native\cpprestsdk.v120.winxp.msvcstl.dyn.rt-dyn.targets" Condition="Exists('..\packages\cpprestsdk.v120.winxp.msvcstl.dyn.rt-dyn.2.8.0\build\native\cpprestsdk.v120.winxp.msvcstl.dyn.rt-dyn.targets')" />
     <Import Project="..\packages\cpprestsdk.v140.winapp.msvcstl.dyn.rt-dyn.2.8.0\build\native\cpprestsdk.v140.winapp.msvcstl.dyn.rt-dyn.targets" Condition="Exists('..\packages\cpprestsdk.v140.winapp.msvcstl.dyn.rt-dyn.2.8.0\build\native\cpprestsdk.v140.winapp.msvcstl.dyn.rt-dyn.targets')" />
     <Import Project="..\packages\cpprestsdk.v140.windesktop.msvcstl.dyn.rt-dyn.2.8.0\build\native\cpprestsdk.v140.windesktop.msvcstl.dyn.rt-dyn.targets" Condition="Exists('..\packages\cpprestsdk.v140.windesktop.msvcstl.dyn.rt-dyn.2.8.0\build\native\cpprestsdk.v140.windesktop.msvcstl.dyn.rt-dyn.targets')" />
+    <Import Project="..\packages\boost.1.61.0.0\build\native\boost.targets" Condition="Exists('..\packages\boost.1.61.0.0\build\native\boost.targets')" />
   </ImportGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
@@ -134,5 +139,6 @@
     <Error Condition="!Exists('..\packages\cpprestsdk.v120.winxp.msvcstl.dyn.rt-dyn.2.8.0\build\native\cpprestsdk.v120.winxp.msvcstl.dyn.rt-dyn.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\cpprestsdk.v120.winxp.msvcstl.dyn.rt-dyn.2.8.0\build\native\cpprestsdk.v120.winxp.msvcstl.dyn.rt-dyn.targets'))" />
     <Error Condition="!Exists('..\packages\cpprestsdk.v140.winapp.msvcstl.dyn.rt-dyn.2.8.0\build\native\cpprestsdk.v140.winapp.msvcstl.dyn.rt-dyn.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\cpprestsdk.v140.winapp.msvcstl.dyn.rt-dyn.2.8.0\build\native\cpprestsdk.v140.winapp.msvcstl.dyn.rt-dyn.targets'))" />
     <Error Condition="!Exists('..\packages\cpprestsdk.v140.windesktop.msvcstl.dyn.rt-dyn.2.8.0\build\native\cpprestsdk.v140.windesktop.msvcstl.dyn.rt-dyn.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\cpprestsdk.v140.windesktop.msvcstl.dyn.rt-dyn.2.8.0\build\native\cpprestsdk.v140.windesktop.msvcstl.dyn.rt-dyn.targets'))" />
+    <Error Condition="!Exists('..\packages\boost.1.61.0.0\build\native\boost.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\boost.1.61.0.0\build\native\boost.targets'))" />
   </Target>
 </Project>

@@ -8,31 +8,31 @@ using System.Collections.Generic;
 using System.IO;
 using LCM.LCM;
  
-namespace PtzCamera
+namespace ptz_camera
 {
-    public sealed class StreamUriResponse_t : LCM.LCM.LCMEncodable
+    public sealed class stream_uri_response_t : LCM.LCM.LCMEncodable
     {
-        public String cameraName;
+        public String ip_address;
         public String uri;
  
-        public StreamUriResponse_t()
+        public stream_uri_response_t()
         {
         }
  
         public static readonly ulong LCM_FINGERPRINT;
-        public static readonly ulong LCM_FINGERPRINT_BASE = 0x2dbcedd3de8c8bd7L;
+        public static readonly ulong LCM_FINGERPRINT_BASE = 0x6337a3dc87761e12L;
  
-        static StreamUriResponse_t()
+        static stream_uri_response_t()
         {
             LCM_FINGERPRINT = _hashRecursive(new List<String>());
         }
  
         public static ulong _hashRecursive(List<String> classes)
         {
-            if (classes.Contains("PtzCamera.StreamUriResponse_t"))
+            if (classes.Contains("ptz_camera.stream_uri_response_t"))
                 return 0L;
  
-            classes.Add("PtzCamera.StreamUriResponse_t");
+            classes.Add("ptz_camera.stream_uri_response_t");
             ulong hash = LCM_FINGERPRINT_BASE
                 ;
             classes.RemoveAt(classes.Count - 1);
@@ -48,17 +48,17 @@ namespace PtzCamera
         public void _encodeRecursive(LCMDataOutputStream outs)
         {
             byte[] __strbuf = null;
-            __strbuf = System.Text.Encoding.GetEncoding("US-ASCII").GetBytes(this.cameraName); outs.Write(__strbuf.Length+1); outs.Write(__strbuf, 0, __strbuf.Length); outs.Write((byte) 0); 
+            __strbuf = System.Text.Encoding.GetEncoding("US-ASCII").GetBytes(this.ip_address); outs.Write(__strbuf.Length+1); outs.Write(__strbuf, 0, __strbuf.Length); outs.Write((byte) 0); 
  
             __strbuf = System.Text.Encoding.GetEncoding("US-ASCII").GetBytes(this.uri); outs.Write(__strbuf.Length+1); outs.Write(__strbuf, 0, __strbuf.Length); outs.Write((byte) 0); 
  
         }
  
-        public StreamUriResponse_t(byte[] data) : this(new LCMDataInputStream(data))
+        public stream_uri_response_t(byte[] data) : this(new LCMDataInputStream(data))
         {
         }
  
-        public StreamUriResponse_t(LCMDataInputStream ins)
+        public stream_uri_response_t(LCMDataInputStream ins)
         {
             if ((ulong) ins.ReadInt64() != LCM_FINGERPRINT)
                 throw new System.IO.IOException("LCM Decode error: bad fingerprint");
@@ -66,9 +66,9 @@ namespace PtzCamera
             _decodeRecursive(ins);
         }
  
-        public static PtzCamera.StreamUriResponse_t _decodeRecursiveFactory(LCMDataInputStream ins)
+        public static ptz_camera.stream_uri_response_t _decodeRecursiveFactory(LCMDataInputStream ins)
         {
-            PtzCamera.StreamUriResponse_t o = new PtzCamera.StreamUriResponse_t();
+            ptz_camera.stream_uri_response_t o = new ptz_camera.stream_uri_response_t();
             o._decodeRecursive(ins);
             return o;
         }
@@ -76,16 +76,16 @@ namespace PtzCamera
         public void _decodeRecursive(LCMDataInputStream ins)
         {
             byte[] __strbuf = null;
-            __strbuf = new byte[ins.ReadInt32()-1]; ins.ReadFully(__strbuf); ins.ReadByte(); this.cameraName = System.Text.Encoding.GetEncoding("US-ASCII").GetString(__strbuf);
+            __strbuf = new byte[ins.ReadInt32()-1]; ins.ReadFully(__strbuf); ins.ReadByte(); this.ip_address = System.Text.Encoding.GetEncoding("US-ASCII").GetString(__strbuf);
  
             __strbuf = new byte[ins.ReadInt32()-1]; ins.ReadFully(__strbuf); ins.ReadByte(); this.uri = System.Text.Encoding.GetEncoding("US-ASCII").GetString(__strbuf);
  
         }
  
-        public PtzCamera.StreamUriResponse_t Copy()
+        public ptz_camera.stream_uri_response_t Copy()
         {
-            PtzCamera.StreamUriResponse_t outobj = new PtzCamera.StreamUriResponse_t();
-            outobj.cameraName = this.cameraName;
+            ptz_camera.stream_uri_response_t outobj = new ptz_camera.stream_uri_response_t();
+            outobj.ip_address = this.ip_address;
  
             outobj.uri = this.uri;
  

@@ -1,7 +1,7 @@
 #pragma once
 
 #ifndef __services_udp_socket_provider__
-#define _services_udp_socket_provider
+#define __services_udp_socket_provider__
 
 #include "SunApiRequestResponseTypes\BroadcastTypes.h"
 #include <winsock2.h>
@@ -15,7 +15,7 @@ public:
 private:
 	int _client_socket;
 	sockaddr_in _broadcast_address;
-	sockaddr_in _server_address;
+	sockaddr_in _client_address;
 };
 
 #endif

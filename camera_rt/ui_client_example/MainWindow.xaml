@@ -8,11 +8,50 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="350" Width="525">
     <Grid>
-        <Button Width="Auto" Height="Auto" Content="Discover" Command="{Binding DiscoverCommand}" Margin="45,22,410,257" ></Button>
-        <Button Height="Auto" Content="GetStreamURI" Command="{Binding GetStreamUriCommand}" Margin="45,83,355,174"/>
-        <ComboBox Width="Auto" Height="Auto" DataContext="{Binding}" IsSynchronizedWithCurrentItem="True"
-                  SelectedIndex="{Binding SelectedCamera, Mode=TwoWay}"  
-                  ItemsSource="{Binding CameraList}" Margin="167,94,262,185" />
-        <TextBlock Width="82" Height="40" Text="{Binding StreamUri}" Margin="260,94,175,185"/>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="20*"/>
+            <RowDefinition Height="20*"/>
+            <RowDefinition Height="20*"/>
+            <RowDefinition Height="20*"/>
+            <RowDefinition Height="20*"/>
+        </Grid.RowDefinitions>
+        <Button Grid.Row="0" Height="40" Width="120" Content="Discover" 
+                Command="{Binding DiscoverCommand}" Margin="14,0" />
+
+        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Stretch">
+            <Button Height="40" Width="120" Content="GetStreamURI" Command="{Binding GetStreamUriCommand}" Margin="14,0"  />
+            <ComboBox Height="40" Width="120" 
+                      VerticalContentAlignment="Center"
+                      HorizontalContentAlignment="Center"                      
+                      SelectedIndex="{Binding SelectedCamera, Mode=TwoWay}" 
+            	      ItemsSource="{Binding CameraList}" Margin="0,7" />
+            <ScrollViewer VerticalScrollBarVisibility="Visible" Margin="10">
+                <TextBlock Width="200" Text="{Binding StreamUri, Mode=TwoWay}"                       
+                       TextWrapping="Wrap" HorizontalAlignment="Stretch"
+                       ScrollViewer.VerticalScrollBarVisibility="Visible"
+                       ScrollViewer.CanContentScroll="True" />
+            </ScrollViewer>
+        </StackPanel>
+
+        <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="14,0">
+            <Button Content="Pan Right" Height="40" Width="80" Command="{Binding PanRightCommand}"/>
+            <Button Content="Pan Left" Height="40" Width="80" Command="{Binding PanLeftCommand}"/>
+            <TextBlock Width="100" Text="{Binding PanRequestOk, Mode=TwoWay}" />
+            <TextBlock Width="100" Text="{Binding PanPosition, Mode=TwoWay}" />
+        </StackPanel>
+
+        <StackPanel Grid.Row="3" Orientation="Horizontal" Margin="14,0">            
+            <Button Content="Tilt Up" Height="40" Width="80"/>
+            <Button Content="Tilt Down" Height="40" Width="80"/>
+            <TextBlock Width="100" Text="{Binding TiltRequestOk, Mode=TwoWay}" />
+            <TextBlock Width="100" Text="{Binding TiltPosition, Mode=TwoWay}" />            
+        </StackPanel>
+        
+        <StackPanel Grid.Row="4" Orientation="Horizontal" Margin="14,0">           
+            <Button Content="Zoom In" Height="40" Width="80"/>
+            <Button Content="Zoom Out" Height="40" Width="80"/>
+            <TextBlock Width="100" Text="{Binding ZoomRequestOk, Mode=TwoWay}" />
+            <TextBlock Width="100" Text="{Binding ZoomPosition, Mode=TwoWay}" />
+        </StackPanel>
     </Grid>
 </Window>

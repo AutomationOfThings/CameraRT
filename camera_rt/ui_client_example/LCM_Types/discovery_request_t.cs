@@ -8,29 +8,29 @@ using System.Collections.Generic;
 using System.IO;
 using LCM.LCM;
  
-namespace PtzCamera
+namespace ptz_camera
 {
-    public sealed class DiscoveryRequest_t : LCM.LCM.LCMEncodable
+    public sealed class discovery_request_t : LCM.LCM.LCMEncodable
     {
  
-        public DiscoveryRequest_t()
+        public discovery_request_t()
         {
         }
  
         public static readonly ulong LCM_FINGERPRINT;
         public static readonly ulong LCM_FINGERPRINT_BASE = 0x0000000012345678L;
  
-        static DiscoveryRequest_t()
+        static discovery_request_t()
         {
             LCM_FINGERPRINT = _hashRecursive(new List<String>());
         }
  
         public static ulong _hashRecursive(List<String> classes)
         {
-            if (classes.Contains("PtzCamera.DiscoveryRequest_t"))
+            if (classes.Contains("ptz_camera.discovery_request_t"))
                 return 0L;
  
-            classes.Add("PtzCamera.DiscoveryRequest_t");
+            classes.Add("ptz_camera.discovery_request_t");
             ulong hash = LCM_FINGERPRINT_BASE
                 ;
             classes.RemoveAt(classes.Count - 1);
@@ -47,11 +47,11 @@ namespace PtzCamera
         {
         }
  
-        public DiscoveryRequest_t(byte[] data) : this(new LCMDataInputStream(data))
+        public discovery_request_t(byte[] data) : this(new LCMDataInputStream(data))
         {
         }
  
-        public DiscoveryRequest_t(LCMDataInputStream ins)
+        public discovery_request_t(LCMDataInputStream ins)
         {
             if ((ulong) ins.ReadInt64() != LCM_FINGERPRINT)
                 throw new System.IO.IOException("LCM Decode error: bad fingerprint");
@@ -59,9 +59,9 @@ namespace PtzCamera
             _decodeRecursive(ins);
         }
  
-        public static PtzCamera.DiscoveryRequest_t _decodeRecursiveFactory(LCMDataInputStream ins)
+        public static ptz_camera.discovery_request_t _decodeRecursiveFactory(LCMDataInputStream ins)
         {
-            PtzCamera.DiscoveryRequest_t o = new PtzCamera.DiscoveryRequest_t();
+            ptz_camera.discovery_request_t o = new ptz_camera.discovery_request_t();
             o._decodeRecursive(ins);
             return o;
         }
@@ -70,9 +70,9 @@ namespace PtzCamera
         {
         }
  
-        public PtzCamera.DiscoveryRequest_t Copy()
+        public ptz_camera.discovery_request_t Copy()
         {
-            PtzCamera.DiscoveryRequest_t outobj = new PtzCamera.DiscoveryRequest_t();
+            ptz_camera.discovery_request_t outobj = new ptz_camera.discovery_request_t();
             return outobj;
         }
     }

@@ -8,30 +8,29 @@ using System.Collections.Generic;
 using System.IO;
 using LCM.LCM;
  
-namespace PtzCamera
+namespace ptz_camera
 {
-    public sealed class PositionRequest_t : LCM.LCM.LCMEncodable
+    public sealed class discovery_request_t : LCM.LCM.LCMEncodable
     {
-        public String cameraName;
  
-        public PositionRequest_t()
+        public discovery_request_t()
         {
         }
  
         public static readonly ulong LCM_FINGERPRINT;
-        public static readonly ulong LCM_FINGERPRINT_BASE = 0xe1794355e65acf4fL;
+        public static readonly ulong LCM_FINGERPRINT_BASE = 0x0000000012345678L;
  
-        static PositionRequest_t()
+        static discovery_request_t()
         {
             LCM_FINGERPRINT = _hashRecursive(new List<String>());
         }
  
         public static ulong _hashRecursive(List<String> classes)
         {
-            if (classes.Contains("PtzCamera.PositionRequest_t"))
+            if (classes.Contains("ptz_camera.discovery_request_t"))
                 return 0L;
  
-            classes.Add("PtzCamera.PositionRequest_t");
+            classes.Add("ptz_camera.discovery_request_t");
             ulong hash = LCM_FINGERPRINT_BASE
                 ;
             classes.RemoveAt(classes.Count - 1);
@@ -46,16 +45,13 @@ namespace PtzCamera
  
         public void _encodeRecursive(LCMDataOutputStream outs)
         {
-            byte[] __strbuf = null;
-            __strbuf = System.Text.Encoding.GetEncoding("US-ASCII").GetBytes(this.cameraName); outs.Write(__strbuf.Length+1); outs.Write(__strbuf, 0, __strbuf.Length); outs.Write((byte) 0); 
- 
         }
  
-        public PositionRequest_t(byte[] data) : this(new LCMDataInputStream(data))
+        public discovery_request_t(byte[] data) : this(new LCMDataInputStream(data))
         {
         }
  
-        public PositionRequest_t(LCMDataInputStream ins)
+        public discovery_request_t(LCMDataInputStream ins)
         {
             if ((ulong) ins.ReadInt64() != LCM_FINGERPRINT)
                 throw new System.IO.IOException("LCM Decode error: bad fingerprint");
@@ -63,25 +59,20 @@ namespace PtzCamera
             _decodeRecursive(ins);
         }
  
-        public static PtzCamera.PositionRequest_t _decodeRecursiveFactory(LCMDataInputStream ins)
+        public static ptz_camera.discovery_request_t _decodeRecursiveFactory(LCMDataInputStream ins)
         {
-            PtzCamera.PositionRequest_t o = new PtzCamera.PositionRequest_t();
+            ptz_camera.discovery_request_t o = new ptz_camera.discovery_request_t();
             o._decodeRecursive(ins);
             return o;
         }
  
         public void _decodeRecursive(LCMDataInputStream ins)
         {
-            byte[] __strbuf = null;
-            __strbuf = new byte[ins.ReadInt32()-1]; ins.ReadFully(__strbuf); ins.ReadByte(); this.cameraName = System.Text.Encoding.GetEncoding("US-ASCII").GetString(__strbuf);
- 
         }
  
-        public PtzCamera.PositionRequest_t Copy()
+        public ptz_camera.discovery_request_t Copy()
         {
-            PtzCamera.PositionRequest_t outobj = new PtzCamera.PositionRequest_t();
-            outobj.cameraName = this.cameraName;
- 
+            ptz_camera.discovery_request_t outobj = new ptz_camera.discovery_request_t();
             return outobj;
         }
     }

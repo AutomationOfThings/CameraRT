@@ -6,21 +6,18 @@
 
 #include <lcm/lcm_coretypes.h>
 
-#ifndef __PtzCamera_DiscoveryResponse_t_hpp__
-#define __PtzCamera_DiscoveryResponse_t_hpp__
+#ifndef __ptz_camera_position_request_t_hpp__
+#define __ptz_camera_position_request_t_hpp__
 
-#include <vector>
 #include <string>
 
-namespace PtzCamera
+namespace ptz_camera
 {
 
-class DiscoveryResponse_t
+class position_request_t
 {
     public:
-        int32_t    totalCams;
-
-        std::vector< std::string > cameraNames;
+        std::string ip_address;
 
     public:
         /**
@@ -58,7 +55,7 @@ class DiscoveryResponse_t
         inline static int64_t getHash();
 
         /**
-         * Returns "DiscoveryResponse_t"
+         * Returns "position_request_t"
          */
         inline static const char* getTypeName();
 
@@ -69,7 +66,7 @@ class DiscoveryResponse_t
         inline static uint64_t _computeHash(const __lcm_hash_ptr *p);
 };
 
-int DiscoveryResponse_t::encode(void *buf, int offset, int maxlen) const
+int position_request_t::encode(void *buf, int offset, int maxlen) const
 {
     int pos = 0, tlen;
     int64_t hash = (int64_t)getHash();
@@ -83,7 +80,7 @@ int DiscoveryResponse_t::encode(void *buf, int offset, int maxlen) const
     return pos;
 }
 
-int DiscoveryResponse_t::decode(const void *buf, int offset, int maxlen)
+int position_request_t::decode(const void *buf, int offset, int maxlen)
 {
     int pos = 0, thislen;
 
@@ -98,71 +95,57 @@ int DiscoveryResponse_t::decode(const void *buf, int offset, int maxlen)
     return pos;
 }
 
-int DiscoveryResponse_t::getEncodedSize() const
+int position_request_t::getEncodedSize() const
 {
     return 8 + _getEncodedSizeNoHash();
 }
 
-int64_t DiscoveryResponse_t::getHash()
+int64_t position_request_t::getHash()
 {
     static int64_t hash = _computeHash(NULL);
     return hash;
 }
 
-const char* DiscoveryResponse_t::getTypeName()
+const char* position_request_t::getTypeName()
 {
-    return "DiscoveryResponse_t";
+    return "position_request_t";
 }
 
-int DiscoveryResponse_t::_encodeNoHash(void *buf, int offset, int maxlen) const
+int position_request_t::_encodeNoHash(void *buf, int offset, int maxlen) const
 {
     int pos = 0, tlen;
 
-    tlen = __int32_t_encode_array(buf, offset + pos, maxlen - pos, &this->totalCams, 1);
+    char* ip_address_cstr = (char*) this->ip_address.c_str();
+    tlen = __string_encode_array(buf, offset + pos, maxlen - pos, &ip_address_cstr, 1);
     if(tlen < 0) return tlen; else pos += tlen;
-
-    for (int a0 = 0; a0 < this->totalCams; a0++) {
-        char* __cstr = (char*) this->cameraNames[a0].c_str();
-        tlen = __string_encode_array(buf, offset + pos, maxlen - pos, &__cstr, 1);
-        if(tlen < 0) return tlen; else pos += tlen;
-    }
 
     return pos;
 }
 
-int DiscoveryResponse_t::_decodeNoHash(const void *buf, int offset, int maxlen)
+int position_request_t::_decodeNoHash(const void *buf, int offset, int maxlen)
 {
     int pos = 0, tlen;
 
-    tlen = __int32_t_decode_array(buf, offset + pos, maxlen - pos, &this->totalCams, 1);
+    int32_t __ip_address_len__;
+    tlen = __int32_t_decode_array(buf, offset + pos, maxlen - pos, &__ip_address_len__, 1);
     if(tlen < 0) return tlen; else pos += tlen;
-
-    this->cameraNames.resize(this->totalCams);
-    for (int a0 = 0; a0 < this->totalCams; a0++) {
-        int32_t __elem_len;
-        tlen = __int32_t_decode_array(buf, offset + pos, maxlen - pos, &__elem_len, 1);
-        if(tlen < 0) return tlen; else pos += tlen;
-        if(__elem_len > maxlen - pos) return -1;
-        this->cameraNames[a0].assign(((const char*)buf) + offset + pos, __elem_len -  1);
-        pos += __elem_len;
-    }
+    if(__ip_address_len__ > maxlen - pos) return -1;
+    this->ip_address.assign(((const char*)buf) + offset + pos, __ip_address_len__ - 1);
+    pos += __ip_address_len__;
 
     return pos;
 }
 
-int DiscoveryResponse_t::_getEncodedSizeNoHash() const
+int position_request_t::_getEncodedSizeNoHash() const
 {
     int enc_size = 0;
-    enc_size += __int32_t_encoded_array_size(NULL, 1);
-    for (int a0 = 0; a0 < this->totalCams; a0++) {
-        enc_size += this->cameraNames[a0].size() + 4 + 1;
-    }
+    enc_size += this->ip_address.size() + 4 + 1;
     return enc_size;
 }
 
-uint64_t DiscoveryResponse_t::_computeHash(const __lcm_hash_ptr *)
+uint64_t position_request_t::_computeHash(const __lcm_hash_ptr *)
 {
-    uint64_t hash = 0xeaadfb85578c0b7cLL;
+    uint64_t hash = 0xc58127502e62f3a7LL;
     return (hash<<1) + ((hash>>63)&1);
 }
 

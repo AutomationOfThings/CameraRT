@@ -5,6 +5,7 @@ using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
+using Prism.Events;
 
 namespace ui_client_example
 {
@@ -13,5 +14,10 @@ namespace ui_client_example
     /// </summary>
     public partial class App : Application
     {
+        public EventAggregator EA;
+        public App()
+        {
+            EA = new EventAggregator();
+        }
     }
 }

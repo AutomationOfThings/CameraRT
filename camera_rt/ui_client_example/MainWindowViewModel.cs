@@ -1,32 +1,76 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Runtime.InteropServices;
-using System.Security.Policy;
-using System.Windows.Documents;
 using System.Windows.Input;
 using Prism.Commands;
-using PtzCamera;
+using Prism.Events;
+using ui_client_example.Subscribers;
+using ptz_camera;
+using ui_client_example.Events;
+using System;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 //using LCM = LCM.LCM;
 
 namespace ui_client_example
 {
-    public class MainWindowViewModel
+    public class MainWindowViewModel : INotifyPropertyChanged
     {
         public ICommand DiscoverCommand { get; set; }
         public ICommand GetStreamUriCommand { get; set; }
+        public ICommand PanRightCommand { get; set; }
+        public ICommand PanLeftCommand { get; set; }
+
         private readonly LCM.LCM.LCM _lcm;
-        private string[] _channels = 
-        {
-            "DISCOVERYREQ", "STREAMURIREQ", "PTZCONTROLREQ", "POSITIONREQ"
-        };
+        
         public MainWindowViewModel()
         {
             DiscoverCommand = new DelegateCommand(OnDiscoverCommand);
             GetStreamUriCommand = new DelegateCommand(OnGetStreamUriCommand);
+            PanRightCommand = new DelegateCommand(OnPanRightCommand);
+            PanLeftCommand = new DelegateCommand(OnPanLeftCommand);
+
             _lcm = LCM.LCM.LCM.Singleton;
+
+            dynamic app = ui_client_example.App.Current;
+            var ea = (EventAggregator)app.EA;
+            ea.GetEvent<StreamUriResponseReceived>().Subscribe(OnStreamUriResponseReceived);
+
         }
 
+        private void OnPanLeftCommand()
+        {
+            var ptzControlRequest = new ptz_control_request_t()
+            {
+                ip_address = "192.168.0.148",
+                pan_value = 200,
+                tilt_value = 0,
+                zoom_value = 0
+            };
+
+            _lcm.Publish(Channels.PtzControlReqChannel, ptzControlRequest);
+        }
+
+        private void OnPanRightCommand()
+        {
+            var ptzControlRequest = new ptz_control_request_t()
+            {
+                ip_address = "192.168.0.148",
+                pan_value = 100,
+                tilt_value = 0,
+                zoom_value = 0
+            };
+
+            _lcm.Publish(Channels.PtzControlReqChannel, ptzControlRequest);
+        }
+
+        private void OnStreamUriResponseReceived(stream_uri_response_t res)
+        {
+            StreamUri = res.uri;
+            OnPropertyChanged("StreamUri");       
+        }
+
+      
         public ObservableCollection<string> CameraList
         {
             get
@@ -49,18 +93,42 @@ namespace ui_client_example
 
         private void OnGetStreamUriCommand()
         {
-            var streamUriRequest = new StreamUriRequest_t()
-            {
-                cameraName = SelectedCamera.ToString()
+            string ip_address = "";
+            if (SelectedCamera == 0)
+                ip_address = "192.168.0.148";
+            if (SelectedCamera == 1)
+                ip_address = "192.168.0.119";
+
+            // IMPORTANT: SET unspecifed fields to the empty string ""
+            var streamUriRequest = new stream_uri_request_t()
+            {                
+                ip_address = ip_address,
+                profile = "1",
+                codec_type = "",
+                resolution = "",
+                frame_rate = "",
+                compression_level = "",
+                channel = ""
             };
-            _lcm.Publish(_channels[1], streamUriRequest);
+            _lcm.Publish(Channels.StreamUriReqChannel, streamUriRequest);
+            _lcm.Subscribe(Channels.StreamUriResChannel, new StreamUriResponseHandler());
         }
 
         private void OnDiscoverCommand()
         {
-            var discoveryRequest = new DiscoveryRequest_t();
-            _lcm.Publish(_channels[0], discoveryRequest);
+            var discoveryRequest = new discovery_request_t();
+            _lcm.Publish(Channels.DiscoveryReqChannel, discoveryRequest);
         }
 
+
+        public event PropertyChangedEventHandler PropertyChanged;
+        
+        private void OnPropertyChanged([CallerMemberName] String propertyName = "")
+        {
+            if (PropertyChanged != null)
+            {
+                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+            }
+        }
     }
 }

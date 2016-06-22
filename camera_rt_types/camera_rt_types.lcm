@@ -1,0 +1,51 @@
+package ptz_camera;
+
+struct discovery_request_t
+{
+}
+
+struct discovery_response_t
+{
+    int32_t total_cams;
+    string camera_names[total_cams];
+}
+
+struct stream_uri_request_t
+{
+	string ip_address;
+	string profile;
+	string codec_type;
+	string resolution;
+	string frame_rate;
+	string compression_level;
+	string channel;
+}
+
+struct stream_uri_response_t
+{    
+	string ip_address;
+    string uri;
+}
+
+struct ptz_control_request_t
+{
+	const int32_t ABSOLUTE = 1, RELATIVE = 2;
+	int32_t mode;
+    string ip_address;
+    int8_t pan_value;  //   0 to 360
+    int8_t tilt_value; //  -5 to 185
+    int8_t zoom_value; //  1 to 16
+}
+
+struct position_request_t
+{
+   string ip_address;        
+}
+
+struct position_response_t
+{
+	string ip_address;
+	string pan_value;
+	string tilt_value;
+	string zoom_value;
+}
