@@ -1,73 +1,62 @@
-﻿The UI shall use the lcmdotnet library to publish data to the RT. Channel Name shall be “PTZCAMERA” for all the requests. Steps to executing sample code:
+The UI shall use the lcmdotnet library to publish data to the RT. lcm (https://lcm-proj.github.io/) allows communication between processes via UDP multicast packets. The RT and UI agree to send and receive pre-defined types using the lcm type specification language. For example one of the types defined looks like:
+
+    struct discovery_response_t
+    {
+      int32_t total_cams;
+      string camera_names[total_cams];
+    }
+
+An executable called lcm-gen.exe is then used to compile the lcm type into language specific type. 
 
 
-1. Reference <LCM.dll> in your project
-2. Using lcm-gen.exe Compile DiscoveryRequest_t to get DiscoveryRequest_t.cs
-                lcm-gen --csharp DiscoveryRequest_t.lcm
+All the types that the UI and the runtime are going to use are found in the CameraRT\camera_rt_types\camera_rt_types.lcm file.
 
+Use the lcm-gen.exe tool in the CameraRT\lcm folder to generate C# types as follows:
 
-Sample C# code
-LCM.LCM lcm = LCM.LCM.Singleton;
-DiscoveryRequest_t discoveryRequest = new DiscoveryRequest_t ();
-lcm.Publish("PTZCAMERA", temp); 
+    lcm-gen.exe --csharp camera_rt_types.lcm
 
+All the types will be put in a directory called ptz_camera. The directory is created in the same directory as where the file lcm-gen.exe exists.
 
-         
-1. Discovery Request
+Follow the following steps to publish and subscribe data with lcm.
+<ol>
+<li> Copy all the types to a directory in your project </li>
+<li> Copy CameraRT\camera_rt\ui_client_example\LCM\lcm.dll to a directory in your project and add a reference to <lcm.dll> </li>
+<li> Copy CameraRT\camera_rt\ui_client_example\Channels.cs to a directory in your project </li>
+</ol>
 
+You are now ready to use lcm. Look at the CameraRT\camera_rt\ui_client_example\MainWindowViewModel.cs class for complete samples.
 
-        Request for discovering all network cameras
+Publish sample code:
 
+    // IMPORTANT: SET unspecifed fields to the empty string ""
+    var streamUriRequest = new stream_uri_request_t()
+    {                
+        ip_address = ip_address,
+        profile = "1",
+        codec_type = "",
+        resolution = "",
+        frame_rate = "",
+        compression_level = "",
+        channel = ""
+    };
+    _lcm.Publish(Channels.StreamUriReqChannel, streamUriRequest);
 
-        package PtzCameraRequests;
-struct DiscoveryRequest_t
-{
-}
+Subscribe sample code:
 
-
-1. Discovery Request Response
-        
-        package PtzCameraResponses
-        struct DiscoveryResponse_t
-{
-        int32_t totalCams;
-        string cameraNames[totalCams];
-}
-
-
-1. Stream URI Request
-        struct StreamUriRequest_t
+    public class StreamUriResponseHandler : LCMSubscriber
+    {
+        public void MessageReceived(LCM.LCM.LCM lcm, string channel, LCMDataInputStream data_stream)
         {
-                string cameraName;
+            if (channel == Channels.StreamUriResChannel)
+            {
+                stream_uri_response_t response = new stream_uri_response_t(data_stream);
+                dynamic app = ui_client_example.App.Current;
+                var ea = (EventAggregator)app.EA;
+                ea.GetEvent<StreamUriResponseReceived>().Publish(response);
+            }
         }
+    }
+    _lcm.Subscribe(Channels.StreamUriResChannel, new StreamUriResponseHandler());
 
 
-1. Stream URI Response
-        struct StreamUriResponse_t
-        {        
-                string cameraName;
-                string uri;
-        }
-1. PTZ Control Request
-        struct PtzControlRequest_t
-        {
-                string cameraName;
-                int8_t panValue; // ? -180 to 180
-                int8_t tiltValue; // ? -180 to 180
-                int8_t zoomValue; // ? 1 to 16
-        }
 
-
-        
-1. Position Request
-        struct PositionRequest_t
-        {
-                string cameraName;                
-        }
-
-
-1. Preset Request
-        TODO
- 
-1. Group control Request
-TODO
