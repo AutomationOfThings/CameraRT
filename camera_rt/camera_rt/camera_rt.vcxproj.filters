@@ -66,7 +66,28 @@
     <ClInclude Include="Types\stream_uri_response_t.hpp">
       <Filter>RequestResponseTypes</Filter>
     </ClInclude>
-    <ClInclude Include="channels.h">
+    <ClInclude Include="Types\end_session_request_t.hpp">
+      <Filter>RequestResponseTypes</Filter>
+    </ClInclude>
+    <ClInclude Include="Types\end_session_response_t.hpp">
+      <Filter>RequestResponseTypes</Filter>
+    </ClInclude>
+    <ClInclude Include="Types\init_session_request_t.hpp">
+      <Filter>RequestResponseTypes</Filter>
+    </ClInclude>
+    <ClInclude Include="Types\init_session_response_t.hpp">
+      <Filter>RequestResponseTypes</Filter>
+    </ClInclude>
+    <ClInclude Include="Types\ptz_control_response_t.hpp">
+      <Filter>RequestResponseTypes</Filter>
+    </ClInclude>
+    <ClInclude Include="sun_api_response_parser.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="lcm_handler.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="channel_names.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -78,6 +99,15 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="udp_socket_provider.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="sun_api_response_parser.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="lcm_handler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="channel_names.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

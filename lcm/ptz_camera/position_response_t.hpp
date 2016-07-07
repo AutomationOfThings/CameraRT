@@ -25,6 +25,8 @@ class position_response_t
 
         std::string zoom_value;
 
+        std::string response_message;
+
     public:
         /**
          * Encode a message into binary form.
@@ -137,6 +139,10 @@ int position_response_t::_encodeNoHash(void *buf, int offset, int maxlen) const
     tlen = __string_encode_array(buf, offset + pos, maxlen - pos, &zoom_value_cstr, 1);
     if(tlen < 0) return tlen; else pos += tlen;
 
+    char* response_message_cstr = (char*) this->response_message.c_str();
+    tlen = __string_encode_array(buf, offset + pos, maxlen - pos, &response_message_cstr, 1);
+    if(tlen < 0) return tlen; else pos += tlen;
+
     return pos;
 }
 
@@ -172,6 +178,13 @@ int position_response_t::_decodeNoHash(const void *buf, int offset, int maxlen)
     this->zoom_value.assign(((const char*)buf) + offset + pos, __zoom_value_len__ - 1);
     pos += __zoom_value_len__;
 
+    int32_t __response_message_len__;
+    tlen = __int32_t_decode_array(buf, offset + pos, maxlen - pos, &__response_message_len__, 1);
+    if(tlen < 0) return tlen; else pos += tlen;
+    if(__response_message_len__ > maxlen - pos) return -1;
+    this->response_message.assign(((const char*)buf) + offset + pos, __response_message_len__ - 1);
+    pos += __response_message_len__;
+
     return pos;
 }
 
@@ -182,12 +195,13 @@ int position_response_t::_getEncodedSizeNoHash() const
     enc_size += this->pan_value.size() + 4 + 1;
     enc_size += this->tilt_value.size() + 4 + 1;
     enc_size += this->zoom_value.size() + 4 + 1;
+    enc_size += this->response_message.size() + 4 + 1;
     return enc_size;
 }
 
 uint64_t position_response_t::_computeHash(const __lcm_hash_ptr *)
 {
-    uint64_t hash = 0x7f6ca048f2a83c49LL;
+    uint64_t hash = 0x18d125b138864827LL;
     return (hash<<1) + ((hash>>63)&1);
 }
 

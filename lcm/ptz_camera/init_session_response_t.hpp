@@ -6,20 +6,18 @@
 
 #include <lcm/lcm_coretypes.h>
 
-#ifndef __ptz_camera_stream_uri_response_t_hpp__
-#define __ptz_camera_stream_uri_response_t_hpp__
+#ifndef __ptz_camera_init_session_response_t_hpp__
+#define __ptz_camera_init_session_response_t_hpp__
 
 #include <string>
 
 namespace ptz_camera
 {
 
-class stream_uri_response_t
+class init_session_response_t
 {
     public:
         std::string ip_address;
-
-        std::string uri;
 
         std::string response_message;
 
@@ -59,7 +57,7 @@ class stream_uri_response_t
         inline static int64_t getHash();
 
         /**
-         * Returns "stream_uri_response_t"
+         * Returns "init_session_response_t"
          */
         inline static const char* getTypeName();
 
@@ -70,7 +68,7 @@ class stream_uri_response_t
         inline static uint64_t _computeHash(const __lcm_hash_ptr *p);
 };
 
-int stream_uri_response_t::encode(void *buf, int offset, int maxlen) const
+int init_session_response_t::encode(void *buf, int offset, int maxlen) const
 {
     int pos = 0, tlen;
     int64_t hash = (int64_t)getHash();
@@ -84,7 +82,7 @@ int stream_uri_response_t::encode(void *buf, int offset, int maxlen) const
     return pos;
 }
 
-int stream_uri_response_t::decode(const void *buf, int offset, int maxlen)
+int init_session_response_t::decode(const void *buf, int offset, int maxlen)
 {
     int pos = 0, thislen;
 
@@ -99,32 +97,28 @@ int stream_uri_response_t::decode(const void *buf, int offset, int maxlen)
     return pos;
 }
 
-int stream_uri_response_t::getEncodedSize() const
+int init_session_response_t::getEncodedSize() const
 {
     return 8 + _getEncodedSizeNoHash();
 }
 
-int64_t stream_uri_response_t::getHash()
+int64_t init_session_response_t::getHash()
 {
     static int64_t hash = _computeHash(NULL);
     return hash;
 }
 
-const char* stream_uri_response_t::getTypeName()
+const char* init_session_response_t::getTypeName()
 {
-    return "stream_uri_response_t";
+    return "init_session_response_t";
 }
 
-int stream_uri_response_t::_encodeNoHash(void *buf, int offset, int maxlen) const
+int init_session_response_t::_encodeNoHash(void *buf, int offset, int maxlen) const
 {
     int pos = 0, tlen;
 
     char* ip_address_cstr = (char*) this->ip_address.c_str();
     tlen = __string_encode_array(buf, offset + pos, maxlen - pos, &ip_address_cstr, 1);
-    if(tlen < 0) return tlen; else pos += tlen;
-
-    char* uri_cstr = (char*) this->uri.c_str();
-    tlen = __string_encode_array(buf, offset + pos, maxlen - pos, &uri_cstr, 1);
     if(tlen < 0) return tlen; else pos += tlen;
 
     char* response_message_cstr = (char*) this->response_message.c_str();
@@ -134,7 +128,7 @@ int stream_uri_response_t::_encodeNoHash(void *buf, int offset, int maxlen) cons
     return pos;
 }
 
-int stream_uri_response_t::_decodeNoHash(const void *buf, int offset, int maxlen)
+int init_session_response_t::_decodeNoHash(const void *buf, int offset, int maxlen)
 {
     int pos = 0, tlen;
 
@@ -144,13 +138,6 @@ int stream_uri_response_t::_decodeNoHash(const void *buf, int offset, int maxlen
     if(__ip_address_len__ > maxlen - pos) return -1;
     this->ip_address.assign(((const char*)buf) + offset + pos, __ip_address_len__ - 1);
     pos += __ip_address_len__;
-
-    int32_t __uri_len__;
-    tlen = __int32_t_decode_array(buf, offset + pos, maxlen - pos, &__uri_len__, 1);
-    if(tlen < 0) return tlen; else pos += tlen;
-    if(__uri_len__ > maxlen - pos) return -1;
-    this->uri.assign(((const char*)buf) + offset + pos, __uri_len__ - 1);
-    pos += __uri_len__;
 
     int32_t __response_message_len__;
     tlen = __int32_t_decode_array(buf, offset + pos, maxlen - pos, &__response_message_len__, 1);
@@ -162,18 +149,17 @@ int stream_uri_response_t::_decodeNoHash(const void *buf, int offset, int maxlen
     return pos;
 }
 
-int stream_uri_response_t::_getEncodedSizeNoHash() const
+int init_session_response_t::_getEncodedSizeNoHash() const
 {
     int enc_size = 0;
     enc_size += this->ip_address.size() + 4 + 1;
-    enc_size += this->uri.size() + 4 + 1;
     enc_size += this->response_message.size() + 4 + 1;
     return enc_size;
 }
 
-uint64_t stream_uri_response_t::_computeHash(const __lcm_hash_ptr *)
+uint64_t init_session_response_t::_computeHash(const __lcm_hash_ptr *)
 {
-    uint64_t hash = 0x3dff6cd473792915LL;
+    uint64_t hash = 0xf80f8b8aacfaf9aaLL;
     return (hash<<1) + ((hash>>63)&1);
 }
 

@@ -17,19 +17,27 @@ namespace ptz_camera
 class ptz_control_request_t
 {
     public:
-        int32_t    mode;
+        int8_t     mode;
 
         std::string ip_address;
 
-        int8_t     pan_value;
+        int16_t    pan_value;
 
-        int8_t     tilt_value;
+        int16_t    tilt_value;
 
-        int8_t     zoom_value;
+        int16_t    zoom_value;
 
     public:
-        enum { ABSOLUTE = 1 };
-        enum { RELATIVE = 2 };
+        // If you're using C++11 and are getting compiler errors saying things like
+        // ‘constexpr’ needed for in-class initialization of static data member
+        // then re-run lcm-gen with '--cpp-std=c++11' to generate code that is
+        // compliant with C++11
+        static const int8_t   ABSOLUTE = 1;
+        // If you're using C++11 and are getting compiler errors saying things like
+        // ‘constexpr’ needed for in-class initialization of static data member
+        // then re-run lcm-gen with '--cpp-std=c++11' to generate code that is
+        // compliant with C++11
+        static const int8_t   RELATIVE = 2;
 
     public:
         /**
@@ -127,20 +135,20 @@ int ptz_control_request_t::_encodeNoHash(void *buf, int offset, int maxlen) cons
 {
     int pos = 0, tlen;
 
-    tlen = __int32_t_encode_array(buf, offset + pos, maxlen - pos, &this->mode, 1);
+    tlen = __int8_t_encode_array(buf, offset + pos, maxlen - pos, &this->mode, 1);
     if(tlen < 0) return tlen; else pos += tlen;
 
     char* ip_address_cstr = (char*) this->ip_address.c_str();
     tlen = __string_encode_array(buf, offset + pos, maxlen - pos, &ip_address_cstr, 1);
     if(tlen < 0) return tlen; else pos += tlen;
 
-    tlen = __int8_t_encode_array(buf, offset + pos, maxlen - pos, &this->pan_value, 1);
+    tlen = __int16_t_encode_array(buf, offset + pos, maxlen - pos, &this->pan_value, 1);
     if(tlen < 0) return tlen; else pos += tlen;
 
-    tlen = __int8_t_encode_array(buf, offset + pos, maxlen - pos, &this->tilt_value, 1);
+    tlen = __int16_t_encode_array(buf, offset + pos, maxlen - pos, &this->tilt_value, 1);
     if(tlen < 0) return tlen; else pos += tlen;
 
-    tlen = __int8_t_encode_array(buf, offset + pos, maxlen - pos, &this->zoom_value, 1);
+    tlen = __int16_t_encode_array(buf, offset + pos, maxlen - pos, &this->zoom_value, 1);
     if(tlen < 0) return tlen; else pos += tlen;
 
     return pos;
@@ -150,7 +158,7 @@ int ptz_control_request_t::_decodeNoHash(const void *buf, int offset, int maxlen
 {
     int pos = 0, tlen;
 
-    tlen = __int32_t_decode_array(buf, offset + pos, maxlen - pos, &this->mode, 1);
+    tlen = __int8_t_decode_array(buf, offset + pos, maxlen - pos, &this->mode, 1);
     if(tlen < 0) return tlen; else pos += tlen;
 
     int32_t __ip_address_len__;
@@ -160,13 +168,13 @@ int ptz_control_request_t::_decodeNoHash(const void *buf, int offset, int maxlen
     this->ip_address.assign(((const char*)buf) + offset + pos, __ip_address_len__ - 1);
     pos += __ip_address_len__;
 
-    tlen = __int8_t_decode_array(buf, offset + pos, maxlen - pos, &this->pan_value, 1);
+    tlen = __int16_t_decode_array(buf, offset + pos, maxlen - pos, &this->pan_value, 1);
     if(tlen < 0) return tlen; else pos += tlen;
 
-    tlen = __int8_t_decode_array(buf, offset + pos, maxlen - pos, &this->tilt_value, 1);
+    tlen = __int16_t_decode_array(buf, offset + pos, maxlen - pos, &this->tilt_value, 1);
     if(tlen < 0) return tlen; else pos += tlen;
 
-    tlen = __int8_t_decode_array(buf, offset + pos, maxlen - pos, &this->zoom_value, 1);
+    tlen = __int16_t_decode_array(buf, offset + pos, maxlen - pos, &this->zoom_value, 1);
     if(tlen < 0) return tlen; else pos += tlen;
 
     return pos;
@@ -175,17 +183,17 @@ int ptz_control_request_t::_decodeNoHash(const void *buf, int offset, int maxlen
 int ptz_control_request_t::_getEncodedSizeNoHash() const
 {
     int enc_size = 0;
-    enc_size += __int32_t_encoded_array_size(NULL, 1);
+    enc_size += __int8_t_encoded_array_size(NULL, 1);
     enc_size += this->ip_address.size() + 4 + 1;
-    enc_size += __int8_t_encoded_array_size(NULL, 1);
-    enc_size += __int8_t_encoded_array_size(NULL, 1);
-    enc_size += __int8_t_encoded_array_size(NULL, 1);
+    enc_size += __int16_t_encoded_array_size(NULL, 1);
+    enc_size += __int16_t_encoded_array_size(NULL, 1);
+    enc_size += __int16_t_encoded_array_size(NULL, 1);
     return enc_size;
 }
 
 uint64_t ptz_control_request_t::_computeHash(const __lcm_hash_ptr *)
 {
-    uint64_t hash = 0x6dd57de349000b54LL;
+    uint64_t hash = 0x3743c8f477189f9bLL;
     return (hash<<1) + ((hash>>63)&1);
 }
 

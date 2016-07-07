@@ -5,13 +5,15 @@
 
 #include "SunApiRequestResponseTypes\BroadcastTypes.h"
 #include <winsock2.h>
+#include <vector>
 
 class udp_socket_provider
 {
 public:
 	void create();
-	void send(SunApiTypes::BroadcastRequestPacket request);
-	SunApiTypes::BroadcastResponsePacket recv();
+	std::vector<SunApiTypes::BroadcastResponsePacket> recv();	
+	void send(void* request, size_t size);
+	
 private:
 	int _client_socket;
 	sockaddr_in _broadcast_address;

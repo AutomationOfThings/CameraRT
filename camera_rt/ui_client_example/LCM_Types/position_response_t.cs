@@ -16,13 +16,14 @@ namespace ptz_camera
         public String pan_value;
         public String tilt_value;
         public String zoom_value;
+        public String response_message;
  
         public position_response_t()
         {
         }
  
         public static readonly ulong LCM_FINGERPRINT;
-        public static readonly ulong LCM_FINGERPRINT_BASE = 0x7f6ca048f2a83c49L;
+        public static readonly ulong LCM_FINGERPRINT_BASE = 0x18d125b138864827L;
  
         static position_response_t()
         {
@@ -58,6 +59,8 @@ namespace ptz_camera
  
             __strbuf = System.Text.Encoding.GetEncoding("US-ASCII").GetBytes(this.zoom_value); outs.Write(__strbuf.Length+1); outs.Write(__strbuf, 0, __strbuf.Length); outs.Write((byte) 0); 
  
+            __strbuf = System.Text.Encoding.GetEncoding("US-ASCII").GetBytes(this.response_message); outs.Write(__strbuf.Length+1); outs.Write(__strbuf, 0, __strbuf.Length); outs.Write((byte) 0); 
+ 
         }
  
         public position_response_t(byte[] data) : this(new LCMDataInputStream(data))
@@ -90,6 +93,8 @@ namespace ptz_camera
  
             __strbuf = new byte[ins.ReadInt32()-1]; ins.ReadFully(__strbuf); ins.ReadByte(); this.zoom_value = System.Text.Encoding.GetEncoding("US-ASCII").GetString(__strbuf);
  
+            __strbuf = new byte[ins.ReadInt32()-1]; ins.ReadFully(__strbuf); ins.ReadByte(); this.response_message = System.Text.Encoding.GetEncoding("US-ASCII").GetString(__strbuf);
+ 
         }
  
         public ptz_camera.position_response_t Copy()
@@ -102,6 +107,8 @@ namespace ptz_camera
             outobj.tilt_value = this.tilt_value;
  
             outobj.zoom_value = this.zoom_value;
+ 
+            outobj.response_message = this.response_message;
  
             return outobj;
         }

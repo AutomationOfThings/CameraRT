@@ -5,6 +5,7 @@
 #include <errno.h>
 #include <iostream>
 #include "udp_socket_provider.h"
+#include <vector>
 
 #define BUFLEN 512
 #define CLIENT_PORT 7711
@@ -41,7 +42,7 @@ void udp_socket_provider::create()
 	}	
 }
 
-void udp_socket_provider::send(SunApiTypes::BroadcastRequestPacket request)
+void udp_socket_provider::send(void* request, size_t size)
 {
 	memset(&_broadcast_address, '\0', sizeof(_broadcast_address));
 	_broadcast_address.sin_family = AF_INET;
@@ -54,19 +55,49 @@ void udp_socket_provider::send(SunApiTypes::BroadcastRequestPacket request)
 	if (set_socket_opt == -1)
 		perror("Error: setsocketopt failed");	
 	/*std::cout << "size of request: " << sizeof(request) << std::endl;*/
-	int send = sendto(_client_socket, (char *)&request, sizeof(request),
+	int send = sendto(_client_socket, (char *)request, size,
 		0, (sockaddr *)&_broadcast_address, sizeof(_broadcast_address));
 
 	if (send == -1)
 		perror("Error: sendto call failed");
 }
 
-SunApiTypes::BroadcastResponsePacket udp_socket_provider::recv()
-{
-	SunApiTypes::BroadcastResponsePacket response;
-	int addr_size = sizeof(_client_address);
-	int recv = recvfrom(_client_socket, (char*)&response, sizeof(response), 0, 
-		(sockaddr*)&_client_address, &addr_size);
+std::vector<SunApiTypes::BroadcastResponsePacket> udp_socket_provider::recv()
+{	
+	std::vector<SunApiTypes::BroadcastResponsePacket> broadcast_responses;
 
-	return response;
+	fd_set fds;
+	struct timeval tv;
+	tv.tv_sec = 1;
+	tv.tv_usec = 0;
+
+	FD_ZERO(&fds);
+	FD_SET(_client_socket, &fds);
+
+	int result = select(_client_socket + 1, &fds, NULL, NULL, &tv);
+	if ( result == -1)
+		perror("select failed on client socket");	
+
+	auto timed_out = false;
+
+	while (!timed_out)
+		if (FD_ISSET(_client_socket, &fds))
+		{
+			SunApiTypes::BroadcastResponsePacket broadcast_response;
+			int addr_size = sizeof(_client_address);
+			int recv = recvfrom(_client_socket, (char*)&broadcast_response,
+				sizeof(broadcast_response), 0,
+				(sockaddr*)&_client_address, &addr_size);
+			broadcast_responses.push_back(broadcast_response);	
+
+			select(_client_socket + 1, &fds, NULL, NULL, &tv);
+		}
+
+		else
+			timed_out = true;
+
+	shutdown(_client_socket, 2);
+	closesocket(_client_socket);
+	WSACleanup();
+	return broadcast_responses;
 }

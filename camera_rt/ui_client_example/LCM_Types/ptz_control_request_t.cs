@@ -12,18 +12,18 @@ namespace ptz_camera
 {
     public sealed class ptz_control_request_t : LCM.LCM.LCMEncodable
     {
-        public int mode;
+        public byte mode;
         public String ip_address;
-        public byte pan_value;
-        public byte tilt_value;
-        public byte zoom_value;
+        public short pan_value;
+        public short tilt_value;
+        public short zoom_value;
  
         public ptz_control_request_t()
         {
         }
  
         public static readonly ulong LCM_FINGERPRINT;
-        public static readonly ulong LCM_FINGERPRINT_BASE = 0x6dd57de349000b54L;
+        public static readonly ulong LCM_FINGERPRINT_BASE = 0x3743c8f477189f9bL;
  
         public const int ABSOLUTE = 1;
         public const int RELATIVE = 2;
@@ -88,15 +88,15 @@ namespace ptz_camera
         public void _decodeRecursive(LCMDataInputStream ins)
         {
             byte[] __strbuf = null;
-            this.mode = ins.ReadInt32();
+            this.mode = ins.ReadByte();
  
             __strbuf = new byte[ins.ReadInt32()-1]; ins.ReadFully(__strbuf); ins.ReadByte(); this.ip_address = System.Text.Encoding.GetEncoding("US-ASCII").GetString(__strbuf);
  
-            this.pan_value = ins.ReadByte();
+            this.pan_value = ins.ReadInt16();
  
-            this.tilt_value = ins.ReadByte();
+            this.tilt_value = ins.ReadInt16();
  
-            this.zoom_value = ins.ReadByte();
+            this.zoom_value = ins.ReadInt16();
  
         }
  

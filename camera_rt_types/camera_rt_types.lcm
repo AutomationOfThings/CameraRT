@@ -10,6 +10,30 @@ struct discovery_response_t
     string camera_names[total_cams];
 }
 
+struct init_session_request_t
+{
+	string ip_address;
+	string username;
+	string password;
+}
+
+struct init_session_response_t
+{
+	string ip_address;
+	string response_message;
+}
+
+struct end_session_request_t
+{
+	string ip_address;
+}
+
+struct end_session_response_t
+{
+	string ip_address;
+	string response;
+}
+
 struct stream_uri_request_t
 {
 	string ip_address;
@@ -25,16 +49,23 @@ struct stream_uri_response_t
 {    
 	string ip_address;
     string uri;
+	string response_message;
 }
 
 struct ptz_control_request_t
 {
-	const int32_t ABSOLUTE = 1, RELATIVE = 2;
-	int32_t mode;
+	const int8_t ABSOLUTE = 1, RELATIVE = 2;
+	int8_t mode;
     string ip_address;
-    int8_t pan_value;  //   0 to 360
-    int8_t tilt_value; //  -5 to 185
-    int8_t zoom_value; //  1 to 16
+    int16_t pan_value;  //  0 to 360
+    int16_t tilt_value; // -5 to 185
+    int16_t zoom_value; //  1 to 16
+}
+
+struct ptz_control_response_t
+{
+	string ip_address;
+	string response_message;
 }
 
 struct position_request_t
@@ -48,4 +79,5 @@ struct position_response_t
 	string pan_value;
 	string tilt_value;
 	string zoom_value;
+	string response_message;
 }

@@ -9,49 +9,53 @@
         Title="MainWindow" Height="350" Width="525">
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="20*"/>
-            <RowDefinition Height="20*"/>
-            <RowDefinition Height="20*"/>
-            <RowDefinition Height="20*"/>
-            <RowDefinition Height="20*"/>
+            <RowDefinition Height="18*"/>
+            <RowDefinition Height="18*"/>
+            <RowDefinition Height="18*"/>
+            <RowDefinition Height="18*"/>
+            <RowDefinition Height="18*"/>
+            <RowDefinition Height="18*"/>
         </Grid.RowDefinitions>
         <Button Grid.Row="0" Height="40" Width="120" Content="Discover" 
-                Command="{Binding DiscoverCommand}" Margin="14,0" />
+                Command="{Binding DiscoverCommand}" />
 
-        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Stretch">
-            <Button Height="40" Width="120" Content="GetStreamURI" Command="{Binding GetStreamUriCommand}" Margin="14,0"  />
-            <ComboBox Height="40" Width="120" 
-                      VerticalContentAlignment="Center"
-                      HorizontalContentAlignment="Center"                      
-                      SelectedIndex="{Binding SelectedCamera, Mode=TwoWay}" 
-            	      ItemsSource="{Binding CameraList}" Margin="0,7" />
+        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Stretch" Margin="14,0">
+            <ComboBox Width="120" Height="40"
+            	VerticalContentAlignment="Center"
+            	HorizontalContentAlignment="Center"                      
+            	SelectedIndex="{Binding SelectedCamera, Mode=TwoWay}" 
+            	ItemsSource="{Binding CameraList}"  />
+            <Button Height="40" Width="120" Content="Init Session" Command="{Binding InitSessionCommand}" />
+        </StackPanel>
+
+        <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="14,0">
+            <Button Content="Pan Right" Height="40" Width="80" Command="{Binding PanRightCommand}"/>
+            <Button Content="Pan Left" Height="40" Width="80" Command="{Binding PanLeftCommand}"/>
+        </StackPanel>
+
+        <StackPanel Grid.Row="3" Orientation="Horizontal" Margin="14,0">
+            <Button Content="Tilt Up" Height="40" Width="80" Command="{Binding TiltUpCommand}"/>
+            <Button Content="Tilt Down" Height="40" Width="80" Command="{Binding TiltDownCommand}"/>
+            <Separator Width="50"/>
+            <TextBlock Width="40" Text="{Binding PtzControlResponse, Mode=TwoWay}" TextAlignment="Center" />
+            <TextBlock Width="50" Text="{Binding PanValue, Mode=TwoWay}" />
+            <TextBlock Width="50" Text="{Binding TiltValue, Mode=TwoWay}" />
+            <TextBlock Width="50" Text="{Binding ZoomValue, Mode=TwoWay}" />
+        </StackPanel>
+
+        <StackPanel Grid.Row="4" Orientation="Horizontal" Margin="14,0">
+            <Button Content="Zoom In" Height="40" Width="80" Command="{Binding ZoomInCommand}" />
+            <Button Content="Zoom Out" Height="40" Width="80" Command="{Binding ZoomOutCommand}"/>
+        </StackPanel>
+
+        <StackPanel Grid.Row="5" Orientation="Horizontal" Margin="14,0">
+            <Button Height="40" Width="120" Content="GetStreamURI" Command="{Binding GetStreamUriCommand}"  />
             <ScrollViewer VerticalScrollBarVisibility="Visible" Margin="10">
                 <TextBlock Width="200" Text="{Binding StreamUri, Mode=TwoWay}"                       
                        TextWrapping="Wrap" HorizontalAlignment="Stretch"
                        ScrollViewer.VerticalScrollBarVisibility="Visible"
                        ScrollViewer.CanContentScroll="True" />
             </ScrollViewer>
-        </StackPanel>
-
-        <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="14,0">
-            <Button Content="Pan Right" Height="40" Width="80" Command="{Binding PanRightCommand}"/>
-            <Button Content="Pan Left" Height="40" Width="80" Command="{Binding PanLeftCommand}"/>
-            <TextBlock Width="100" Text="{Binding PanRequestOk, Mode=TwoWay}" />
-            <TextBlock Width="100" Text="{Binding PanPosition, Mode=TwoWay}" />
-        </StackPanel>
-
-        <StackPanel Grid.Row="3" Orientation="Horizontal" Margin="14,0">            
-            <Button Content="Tilt Up" Height="40" Width="80"/>
-            <Button Content="Tilt Down" Height="40" Width="80"/>
-            <TextBlock Width="100" Text="{Binding TiltRequestOk, Mode=TwoWay}" />
-            <TextBlock Width="100" Text="{Binding TiltPosition, Mode=TwoWay}" />            
-        </StackPanel>
-        
-        <StackPanel Grid.Row="4" Orientation="Horizontal" Margin="14,0">           
-            <Button Content="Zoom In" Height="40" Width="80"/>
-            <Button Content="Zoom Out" Height="40" Width="80"/>
-            <TextBlock Width="100" Text="{Binding ZoomRequestOk, Mode=TwoWay}" />
-            <TextBlock Width="100" Text="{Binding ZoomPosition, Mode=TwoWay}" />
         </StackPanel>
     </Grid>
 </Window>
