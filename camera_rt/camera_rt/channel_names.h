@@ -7,6 +7,7 @@ namespace ptz_camera_channels
 	extern const char* discovery_req_channel;
 	extern const char* discovery_res_channel;
 	extern const char* init_session_req_channel;
+	extern const char* init_session_res_channel;
 	extern const char* end_session_req_channel;
 	extern const char* end_session_res_chanel;
 	extern const char* stream_res_channel;

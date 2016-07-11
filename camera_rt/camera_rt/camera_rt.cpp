@@ -7,22 +7,54 @@
 
 
 int _tmain(int argc, _TCHAR* argv[])
-{	
-	std::cout << "╔╗┌─┐┌┬┐┌─┐┬─┐┌─┐╦═╗╔╦╗" << std::endl;
-	std::cout << "║  ├─┤│││├┤ ├┬┘├─┤╠╦╝ ║ " << std::endl;
-	std::cout << "╚═╝┴ ┴┴ ┴└─┘┴└─┴ ┴╩╚═ ╩ " << std::endl;
+{
+	std::cout << " _____                       _____ _____ \n";
+	std::cout << "|     |___ _____ ___ ___ ___| __  |_   _|\n";
+	std::cout << "|   --| .'|     | -_|  _| .'|    -| | |  \n";
+	std::cout << "|_____|__,|_|_|_|___|_| |__,|__|__| |_|  \n\n";	
+
 
 	lcm::LCM lcm;
+
+	std::cout << "Initializing lcm... ";
 
 	if (!lcm.good())
 	{
 		std::cout << "Couldn't allocate lcm\n";
 	}
 
+	std::cout << "success. \n";
+
 	lcm_handler handler(&lcm);
 	
-	lcm.subscribe(ptz_camera_channels::discovery_req_channel, &lcm_handler::on_discovery_req, &handler);
-	lcm.subscribe(ptz_camera_channels::init_session_req_channel, &lcm_handler::on_init_session_req, &handler);
+	std::cout << "Subscribing for reqs... ";
+	lcm.subscribe(
+		ptz_camera_channels::discovery_req_channel, 
+		&lcm_handler::on_discovery_req, &handler);
+
+	lcm.subscribe(ptz_camera_channels::init_session_req_channel, 
+		&lcm_handler::on_init_session_req, &handler);
+
+	lcm.subscribe(
+		ptz_camera_channels::stream_req_channel,
+		&lcm_handler::on_stream_uri_req, &handler);
+
+	lcm.subscribe(
+			ptz_camera_channels::ptz_control_req_channel,
+			&lcm_handler::on_ptz_conrol_req, &handler);
+
+	lcm.subscribe(
+		ptz_camera_channels::stop_ptz_control_req_channel,
+		&lcm_handler::on_stop_ptz_control_req, &handler);
+
+	lcm.subscribe(
+		ptz_camera_channels::position_req_channel,
+		&lcm_handler::on_position_req, &handler);
+
+	lcm.subscribe(ptz_camera_channels::end_session_req_channel,
+		&lcm_handler::on_end_session_req, &handler);
+
+	//std::cout << "success. \n";
 
 	while (0 == lcm.handle());
 

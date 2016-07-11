@@ -97,7 +97,6 @@ std::vector<SunApiTypes::BroadcastResponsePacket> udp_broadcaster::recv()
 			timed_out = true;
 
 	shutdown(_client_socket, 2);
-	closesocket(_client_socket);
-	WSACleanup();
+	closesocket(_client_socket);	
 	return broadcast_responses;
 }

@@ -107,9 +107,10 @@ namespace ui_client_example
             _loginDialog.Close();
             var initSessionRequest = new init_session_request_t()
             {
-                ip_address = CameraList[SelectedCamera],
-                username = Username,
-                password = Password
+                ip_address = CameraList == null || CameraList.Count == 0 ? 
+                "127.0.0.1" : CameraList[SelectedCamera],
+                username = Username??" ",
+                password = Password??" "
             };
 
             _lcm.Publish(Channels.init_session_req_channel, initSessionRequest);
@@ -121,7 +122,7 @@ namespace ui_client_example
         {
             var positionRequest = new position_request_t()
             {
-                ip_address = CameraList[SelectedCamera],
+                ip_address = CameraList == null ? "127.0.0.1" : CameraList[SelectedCamera],
             };
 
             ActionBlock<position_request_t> pollingBlock = null;
@@ -136,7 +137,7 @@ namespace ui_client_example
 
             _lcm.Subscribe(Channels.position_res_channel, new PositionResponseHandler());
             pollingBlock.Post(positionRequest); //seed and start the poller
-            
+
         }
 
         private void OnPanLeftCommand()
