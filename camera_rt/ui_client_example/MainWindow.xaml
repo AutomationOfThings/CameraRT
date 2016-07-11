@@ -26,6 +26,7 @@
             	SelectedIndex="{Binding SelectedCamera, Mode=TwoWay}" 
             	ItemsSource="{Binding CameraList}"  />
             <Button Height="40" Width="120" Content="Init Session" Command="{Binding InitSessionCommand}" />
+            <Button Height="40" Width="120" Content="End Session" Command="{Binding EndSessionCommand}" />
         </StackPanel>
 
         <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="14,0">

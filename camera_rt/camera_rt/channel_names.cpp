@@ -14,4 +14,6 @@ namespace ptz_camera_channels
 	const char* ptz_control_res_channel = "PTZCONTROLRES";
 	const char* position_req_channel = "POSITIONREQ";
 	const char* position_res_channel = "POSITIONRES";
+	const char* stop_ptz_control_req_channel = "STOPPTZCONTROLREQ";
+	const char* stop_ptz_control_res_channel = "STOPPTZCONTROLRES";
 }

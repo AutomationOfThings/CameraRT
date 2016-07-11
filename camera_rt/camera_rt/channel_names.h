@@ -3,8 +3,7 @@
 #define  __ptz_camera_channels__
 
 namespace ptz_camera_channels
-{
-	
+{	
 	extern const char* discovery_req_channel;
 	extern const char* discovery_res_channel;
 	extern const char* init_session_req_channel;
@@ -16,6 +15,8 @@ namespace ptz_camera_channels
 	extern const char* ptz_control_res_channel;
 	extern const char* position_req_channel;
 	extern const char* position_res_channel;
+	extern const char* stop_ptz_control_req_channel;
+	extern const char* stop_ptz_control_res_channel;
 }
 
 #endif // ! __ptz_camera_channels__

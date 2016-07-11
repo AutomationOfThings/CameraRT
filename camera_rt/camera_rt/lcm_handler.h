@@ -5,10 +5,9 @@
 #include "Types\init_session_request_t.hpp"
 #include "Types\end_session_request_t.hpp"
 #include "Types\stream_uri_request_t.hpp"
-#include "Types\stream_uri_response_t.hpp"
 #include "Types\ptz_control_request_t.hpp"
 #include "Types\position_request_t.hpp"
-#include "Types\position_response_t.hpp"
+#include "Types\stop_ptz_control_request_t.hpp"
 
 #include <cpprest\http_client.h>
 #include <cpprest\filestream.h>
@@ -57,6 +56,10 @@ public:
 		const std::string& channel,
 		const ptz_camera::ptz_control_request_t* req);
 
+	void on_stop_ptz_control_req(const lcm::ReceiveBuffer* rbuf,
+		const std::string& channel,
+		const ptz_camera::stop_ptz_control_request_t* req);
+
 	void on_position_req(const lcm::ReceiveBuffer* rbuf,
 		const std::string& channel,
 		const ptz_camera::position_request_t* req);
@@ -65,8 +68,10 @@ private:
 	lcm::LCM* lcm;
 	std::unordered_map <std::string, http_client*> ip_client_map;
 	http_client* clients;
-	std::string session_ip;
-	lcm::Subscription *uri_req_sub, *ptz_control_req_sub, *discovery_req_sub, *position_req_sub;
+
+	lcm::Subscription *uri_req_sub, *ptz_control_req_sub, 
+		*stop_ptz_control_req_sub,
+		*discovery_req_sub, *position_req_sub;
 
 	std::wstring convert_to_wstring(std::string value)
 	{

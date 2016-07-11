@@ -6,25 +6,42 @@
 
 #include <lcm/lcm_coretypes.h>
 
-#ifndef __ptz_camera_discovery_response_t_hpp__
-#define __ptz_camera_discovery_response_t_hpp__
+#ifndef __ptz_camera_stop_ptz_control_request_t_hpp__
+#define __ptz_camera_stop_ptz_control_request_t_hpp__
 
-#include <vector>
 #include <string>
 
 namespace ptz_camera
 {
 
-class discovery_response_t
+class stop_ptz_control_request_t
 {
     public:
-        int32_t    total_cams;
+        std::string ip_address;
 
-        std::vector< std::string > ip_addresses;
+        int8_t     operation_type;
 
-        int16_t    status_code;
-
-        std::string response_message;
+    public:
+        // If you're using C++11 and are getting compiler errors saying things like
+        // ‘constexpr’ needed for in-class initialization of static data member
+        // then re-run lcm-gen with '--cpp-std=c++11' to generate code that is
+        // compliant with C++11
+        static const int8_t   ALL = 1;
+        // If you're using C++11 and are getting compiler errors saying things like
+        // ‘constexpr’ needed for in-class initialization of static data member
+        // then re-run lcm-gen with '--cpp-std=c++11' to generate code that is
+        // compliant with C++11
+        static const int8_t   PAN = 2;
+        // If you're using C++11 and are getting compiler errors saying things like
+        // ‘constexpr’ needed for in-class initialization of static data member
+        // then re-run lcm-gen with '--cpp-std=c++11' to generate code that is
+        // compliant with C++11
+        static const int8_t   TILT = 3;
+        // If you're using C++11 and are getting compiler errors saying things like
+        // ‘constexpr’ needed for in-class initialization of static data member
+        // then re-run lcm-gen with '--cpp-std=c++11' to generate code that is
+        // compliant with C++11
+        static const int8_t   ZOOM = 4;
 
     public:
         /**
@@ -62,7 +79,7 @@ class discovery_response_t
         inline static int64_t getHash();
 
         /**
-         * Returns "discovery_response_t"
+         * Returns "stop_ptz_control_request_t"
          */
         inline static const char* getTypeName();
 
@@ -73,7 +90,7 @@ class discovery_response_t
         inline static uint64_t _computeHash(const __lcm_hash_ptr *p);
 };
 
-int discovery_response_t::encode(void *buf, int offset, int maxlen) const
+int stop_ptz_control_request_t::encode(void *buf, int offset, int maxlen) const
 {
     int pos = 0, tlen;
     int64_t hash = (int64_t)getHash();
@@ -87,7 +104,7 @@ int discovery_response_t::encode(void *buf, int offset, int maxlen) const
     return pos;
 }
 
-int discovery_response_t::decode(const void *buf, int offset, int maxlen)
+int stop_ptz_control_request_t::decode(const void *buf, int offset, int maxlen)
 {
     int pos = 0, thislen;
 
@@ -102,90 +119,64 @@ int discovery_response_t::decode(const void *buf, int offset, int maxlen)
     return pos;
 }
 
-int discovery_response_t::getEncodedSize() const
+int stop_ptz_control_request_t::getEncodedSize() const
 {
     return 8 + _getEncodedSizeNoHash();
 }
 
-int64_t discovery_response_t::getHash()
+int64_t stop_ptz_control_request_t::getHash()
 {
     static int64_t hash = _computeHash(NULL);
     return hash;
 }
 
-const char* discovery_response_t::getTypeName()
+const char* stop_ptz_control_request_t::getTypeName()
 {
-    return "discovery_response_t";
+    return "stop_ptz_control_request_t";
 }
 
-int discovery_response_t::_encodeNoHash(void *buf, int offset, int maxlen) const
+int stop_ptz_control_request_t::_encodeNoHash(void *buf, int offset, int maxlen) const
 {
     int pos = 0, tlen;
 
-    tlen = __int32_t_encode_array(buf, offset + pos, maxlen - pos, &this->total_cams, 1);
+    char* ip_address_cstr = (char*) this->ip_address.c_str();
+    tlen = __string_encode_array(buf, offset + pos, maxlen - pos, &ip_address_cstr, 1);
     if(tlen < 0) return tlen; else pos += tlen;
 
-    for (int a0 = 0; a0 < this->total_cams; a0++) {
-        char* __cstr = (char*) this->ip_addresses[a0].c_str();
-        tlen = __string_encode_array(buf, offset + pos, maxlen - pos, &__cstr, 1);
-        if(tlen < 0) return tlen; else pos += tlen;
-    }
-
-    tlen = __int16_t_encode_array(buf, offset + pos, maxlen - pos, &this->status_code, 1);
-    if(tlen < 0) return tlen; else pos += tlen;
-
-    char* response_message_cstr = (char*) this->response_message.c_str();
-    tlen = __string_encode_array(buf, offset + pos, maxlen - pos, &response_message_cstr, 1);
+    tlen = __int8_t_encode_array(buf, offset + pos, maxlen - pos, &this->operation_type, 1);
     if(tlen < 0) return tlen; else pos += tlen;
 
     return pos;
 }
 
-int discovery_response_t::_decodeNoHash(const void *buf, int offset, int maxlen)
+int stop_ptz_control_request_t::_decodeNoHash(const void *buf, int offset, int maxlen)
 {
     int pos = 0, tlen;
 
-    tlen = __int32_t_decode_array(buf, offset + pos, maxlen - pos, &this->total_cams, 1);
+    int32_t __ip_address_len__;
+    tlen = __int32_t_decode_array(buf, offset + pos, maxlen - pos, &__ip_address_len__, 1);
     if(tlen < 0) return tlen; else pos += tlen;
+    if(__ip_address_len__ > maxlen - pos) return -1;
+    this->ip_address.assign(((const char*)buf) + offset + pos, __ip_address_len__ - 1);
+    pos += __ip_address_len__;
 
-    this->ip_addresses.resize(this->total_cams);
-    for (int a0 = 0; a0 < this->total_cams; a0++) {
-        int32_t __elem_len;
-        tlen = __int32_t_decode_array(buf, offset + pos, maxlen - pos, &__elem_len, 1);
-        if(tlen < 0) return tlen; else pos += tlen;
-        if(__elem_len > maxlen - pos) return -1;
-        this->ip_addresses[a0].assign(((const char*)buf) + offset + pos, __elem_len -  1);
-        pos += __elem_len;
-    }
-
-    tlen = __int16_t_decode_array(buf, offset + pos, maxlen - pos, &this->status_code, 1);
+    tlen = __int8_t_decode_array(buf, offset + pos, maxlen - pos, &this->operation_type, 1);
     if(tlen < 0) return tlen; else pos += tlen;
-
-    int32_t __response_message_len__;
-    tlen = __int32_t_decode_array(buf, offset + pos, maxlen - pos, &__response_message_len__, 1);
-    if(tlen < 0) return tlen; else pos += tlen;
-    if(__response_message_len__ > maxlen - pos) return -1;
-    this->response_message.assign(((const char*)buf) + offset + pos, __response_message_len__ - 1);
-    pos += __response_message_len__;
 
     return pos;
 }
 
-int discovery_response_t::_getEncodedSizeNoHash() const
+int stop_ptz_control_request_t::_getEncodedSizeNoHash() const
 {
     int enc_size = 0;
-    enc_size += __int32_t_encoded_array_size(NULL, 1);
-    for (int a0 = 0; a0 < this->total_cams; a0++) {
-        enc_size += this->ip_addresses[a0].size() + 4 + 1;
-    }
-    enc_size += __int16_t_encoded_array_size(NULL, 1);
-    enc_size += this->response_message.size() + 4 + 1;
+    enc_size += this->ip_address.size() + 4 + 1;
+    enc_size += __int8_t_encoded_array_size(NULL, 1);
     return enc_size;
 }
 
-uint64_t discovery_response_t::_computeHash(const __lcm_hash_ptr *)
+uint64_t stop_ptz_control_request_t::_computeHash(const __lcm_hash_ptr *)
 {
-    uint64_t hash = 0x523c44aa5c281b5aLL;
+    uint64_t hash = 0xc4dd99a934cf2ba7LL;
     return (hash<<1) + ((hash>>63)&1);
 }
 

@@ -4,22 +4,30 @@ struct discovery_request_t
 {
 }
 
+struct status_codes_t
+{
+	const int16_t OK=1, ERR=2;
+}
+
 struct discovery_response_t
 {
     int32_t total_cams;
-    string camera_names[total_cams];
+    string ip_addresses[total_cams];
+	int16_t status_code;
+	string response_message;
 }
 
 struct init_session_request_t
 {
 	string ip_address;
-	string username;
-	string password;
+	string username;	
+	string password;	
 }
 
 struct init_session_response_t
 {
 	string ip_address;
+	int16_t status_code;
 	string response_message;
 }
 
@@ -32,6 +40,8 @@ struct end_session_response_t
 {
 	string ip_address;
 	string response;
+	int16_t status_code;
+	string response_message;
 }
 
 struct stream_uri_request_t
@@ -49,22 +59,37 @@ struct stream_uri_response_t
 {    
 	string ip_address;
     string uri;
+	int16_t status_code;
 	string response_message;
 }
 
 struct ptz_control_request_t
 {
-	const int8_t ABSOLUTE = 1, RELATIVE = 2;
+	const int8_t ABS=1, REL=2, CON=3;
 	int8_t mode;
     string ip_address;
-    int16_t pan_value;  //  0 to 360
-    int16_t tilt_value; // -5 to 185
-    int16_t zoom_value; //  1 to 16
+    string pan_value;  //  0 to 360
+    string tilt_value; // -15 to 195
+    string zoom_value; //  1 to 32
 }
 
+struct stop_ptz_control_request_t
+{
+	string ip_address;
+	const int8_t ALL = 1, PAN = 2, TILT = 3, ZOOM = 4;
+	int8_t operation_type;
+}
+
+struct stop_ptz_control_response_t
+{
+	string ip_address;
+	int16_t status_code;
+	string response_message;
+}
 struct ptz_control_response_t
 {
 	string ip_address;
+	int16_t status_code;
 	string response_message;
 }
 
@@ -79,5 +104,6 @@ struct position_response_t
 	string pan_value;
 	string tilt_value;
 	string zoom_value;
+	int16_t status_code;
 	string response_message;
 }

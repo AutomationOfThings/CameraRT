@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.Windows.Input;
 using Prism.Commands;
 using Prism.Events;
@@ -9,7 +8,6 @@ using ui_client_example.Events;
 using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using System.Windows.Controls;
 using System.Threading.Tasks.Dataflow;
 using System.Threading.Tasks;
 //using LCM = LCM.LCM;
@@ -20,6 +18,7 @@ namespace ui_client_example
     {
         public ICommand DiscoverCommand { get; set; }
         public ICommand InitSessionCommand { get; set; }
+        public ICommand EndSessionCommand { get; set; }
         public ICommand GetStreamUriCommand { get; set; }
         public ICommand PanRightCommand { get; set; }
         public ICommand PanLeftCommand { get; set; }
@@ -39,13 +38,14 @@ namespace ui_client_example
         {
             DiscoverCommand = new DelegateCommand(OnDiscoverCommand);
             InitSessionCommand = new DelegateCommand(OnInitSessionCommand);
+            EndSessionCommand = new DelegateCommand(OnEndSessionCommand);
             GetStreamUriCommand = new DelegateCommand(OnGetStreamUriCommand);
             PanRightCommand = new DelegateCommand(OnPanRightCommand);
             PanLeftCommand = new DelegateCommand(OnPanLeftCommand);
             TiltUpCommand = new DelegateCommand(OnTiltUpCommand);
             TiltDownCommand = new DelegateCommand(OnTiltDownCommand);
-            ZoomInCommand = new DelegateCommand(OnZoomCommand);
-            ZoomOutCommand = new DelegateCommand(OnZoomCommand);
+            ZoomInCommand = new DelegateCommand(OnZoomInCommand);
+            ZoomOutCommand = new DelegateCommand(OnZoomOutCommand);
             LoginCommand = new DelegateCommand<LoginDialog>(OnLoginCommand);
 
             _lcm = LCM.LCM.LCM.Singleton;
@@ -58,9 +58,19 @@ namespace ui_client_example
             ea.GetEvent<PositionResponseReceivedEvent>().Subscribe(OnPositionResponseReceived);
         }
 
+        private void OnEndSessionCommand()
+        {
+            var endSessionRequest = new end_session_request_t()
+            {
+                ip_address = CameraList[SelectedCamera]
+            };
+
+            _lcm.Publish(Channels.end_session_res_chanel, endSessionRequest);
+        }
+
         private void OnDiscoveryResponseReceived(discovery_response_t discovery_response)
         {
-            CameraList = new ObservableCollection<string>(discovery_response.camera_names);
+            CameraList = new ObservableCollection<string>(discovery_response.ip_addresses);
             OnPropertyChanged("CameraList");
         }
 
@@ -133,10 +143,11 @@ namespace ui_client_example
         {
             var ptzControlRequest = new ptz_control_request_t()
             {
+                mode = ptz_control_request_t.REL,
                 ip_address = CameraList[SelectedCamera],
-                pan_value = 10,
-                tilt_value = 0,
-                zoom_value = 0
+                pan_value = "10",
+                tilt_value = "",
+                zoom_value = ""
             };
 
             _lcm.Publish(Channels.ptz_control_req_channel, ptzControlRequest);
@@ -147,10 +158,11 @@ namespace ui_client_example
         {
             var ptzControlRequest = new ptz_control_request_t()
             {
+                mode = ptz_control_request_t.REL,
                 ip_address = CameraList[SelectedCamera],
-                pan_value = -10,
-                tilt_value = 0,
-                zoom_value = 0
+                pan_value = "-10",
+                tilt_value = "",
+                zoom_value = ""
             };
 
             _lcm.Publish(Channels.ptz_control_req_channel, ptzControlRequest);
@@ -161,10 +173,11 @@ namespace ui_client_example
         {
             var ptzControlRequest = new ptz_control_request_t()
             {
+                mode = ptz_control_request_t.REL,
                 ip_address = CameraList[SelectedCamera],
-                pan_value = 0,
-                tilt_value = 10,
-                zoom_value = 0
+                pan_value = "",
+                tilt_value = "10",
+                zoom_value = ""
             };
 
             _lcm.Publish(Channels.ptz_control_req_channel, ptzControlRequest);
@@ -175,24 +188,46 @@ namespace ui_client_example
         {
             var ptzControlRequest = new ptz_control_request_t()
             {
+                mode = ptz_control_request_t.REL,
                 ip_address = CameraList[SelectedCamera],
-                pan_value = 0,
-                tilt_value = -10,
-                zoom_value = 0
+                pan_value = "",
+                tilt_value = "-10",
+                zoom_value = ""
             };
 
             _lcm.Publish(Channels.ptz_control_req_channel, ptzControlRequest);
             _lcm.Subscribe(Channels.ptz_control_res_channel, new PtzControlResponseHandler());
         }
 
-        private void OnZoomCommand()
+        private void OnZoomInCommand()
         {
+            var zoom_v = (Convert.ToDouble(ZoomValue) + 1).ToString();
+         
             var ptzControlRequest = new ptz_control_request_t()
             {
+                mode = ptz_control_request_t.ABS,
+                ip_address = CameraList[SelectedCamera],   
+                pan_value = "",
+                tilt_value = "",             
+                zoom_value = zoom_v,
+
+            };            
+
+            _lcm.Publish(Channels.ptz_control_req_channel, ptzControlRequest);
+            _lcm.Subscribe(Channels.ptz_control_res_channel, new PtzControlResponseHandler());
+        }
+
+        private void OnZoomOutCommand()
+        {
+            var zoom_value = (Convert.ToDouble(ZoomValue) - 1).ToString(); 
+
+            var ptzControlRequest = new ptz_control_request_t()
+            {
+                mode = ptz_control_request_t.ABS,
                 ip_address = CameraList[SelectedCamera],
-                pan_value = 0,
-                tilt_value = 0,
-                zoom_value = 5
+                pan_value = "",
+                tilt_value = "",
+                zoom_value = zoom_value
             };
 
             _lcm.Publish(Channels.ptz_control_req_channel, ptzControlRequest);

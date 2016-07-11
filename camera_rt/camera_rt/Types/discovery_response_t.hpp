@@ -20,7 +20,11 @@ class discovery_response_t
     public:
         int32_t    total_cams;
 
-        std::vector< std::string > camera_names;
+        std::vector< std::string > ip_addresses;
+
+        int16_t    status_code;
+
+        std::string response_message;
 
     public:
         /**
@@ -122,10 +126,17 @@ int discovery_response_t::_encodeNoHash(void *buf, int offset, int maxlen) const
     if(tlen < 0) return tlen; else pos += tlen;
 
     for (int a0 = 0; a0 < this->total_cams; a0++) {
-        char* __cstr = (char*) this->camera_names[a0].c_str();
+        char* __cstr = (char*) this->ip_addresses[a0].c_str();
         tlen = __string_encode_array(buf, offset + pos, maxlen - pos, &__cstr, 1);
         if(tlen < 0) return tlen; else pos += tlen;
     }
+
+    tlen = __int16_t_encode_array(buf, offset + pos, maxlen - pos, &this->status_code, 1);
+    if(tlen < 0) return tlen; else pos += tlen;
+
+    char* response_message_cstr = (char*) this->response_message.c_str();
+    tlen = __string_encode_array(buf, offset + pos, maxlen - pos, &response_message_cstr, 1);
+    if(tlen < 0) return tlen; else pos += tlen;
 
     return pos;
 }
@@ -137,15 +148,25 @@ int discovery_response_t::_decodeNoHash(const void *buf, int offset, int maxlen)
     tlen = __int32_t_decode_array(buf, offset + pos, maxlen - pos, &this->total_cams, 1);
     if(tlen < 0) return tlen; else pos += tlen;
 
-    this->camera_names.resize(this->total_cams);
+    this->ip_addresses.resize(this->total_cams);
     for (int a0 = 0; a0 < this->total_cams; a0++) {
         int32_t __elem_len;
         tlen = __int32_t_decode_array(buf, offset + pos, maxlen - pos, &__elem_len, 1);
         if(tlen < 0) return tlen; else pos += tlen;
         if(__elem_len > maxlen - pos) return -1;
-        this->camera_names[a0].assign(((const char*)buf) + offset + pos, __elem_len -  1);
+        this->ip_addresses[a0].assign(((const char*)buf) + offset + pos, __elem_len -  1);
         pos += __elem_len;
     }
+
+    tlen = __int16_t_decode_array(buf, offset + pos, maxlen - pos, &this->status_code, 1);
+    if(tlen < 0) return tlen; else pos += tlen;
+
+    int32_t __response_message_len__;
+    tlen = __int32_t_decode_array(buf, offset + pos, maxlen - pos, &__response_message_len__, 1);
+    if(tlen < 0) return tlen; else pos += tlen;
+    if(__response_message_len__ > maxlen - pos) return -1;
+    this->response_message.assign(((const char*)buf) + offset + pos, __response_message_len__ - 1);
+    pos += __response_message_len__;
 
     return pos;
 }
@@ -155,14 +176,16 @@ int discovery_response_t::_getEncodedSizeNoHash() const
     int enc_size = 0;
     enc_size += __int32_t_encoded_array_size(NULL, 1);
     for (int a0 = 0; a0 < this->total_cams; a0++) {
-        enc_size += this->camera_names[a0].size() + 4 + 1;
+        enc_size += this->ip_addresses[a0].size() + 4 + 1;
     }
+    enc_size += __int16_t_encoded_array_size(NULL, 1);
+    enc_size += this->response_message.size() + 4 + 1;
     return enc_size;
 }
 
 uint64_t discovery_response_t::_computeHash(const __lcm_hash_ptr *)
 {
-    uint64_t hash = 0xf048aef40b0471e3LL;
+    uint64_t hash = 0x523c44aa5c281b5aLL;
     return (hash<<1) + ((hash>>63)&1);
 }
 

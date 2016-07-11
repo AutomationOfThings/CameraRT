@@ -1,4 +1,4 @@
-// camera_rt.cpp : Defines the entry point for the console application.
+﻿// camera_rt.cpp : Defines the entry point for the console application.
 //
 #include "stdafx.h"
 #include "lcm_handler.h"
@@ -8,6 +8,10 @@
 
 int _tmain(int argc, _TCHAR* argv[])
 {	
+	std::cout << "╔╗┌─┐┌┬┐┌─┐┬─┐┌─┐╦═╗╔╦╗" << std::endl;
+	std::cout << "║  ├─┤│││├┤ ├┬┘├─┤╠╦╝ ║ " << std::endl;
+	std::cout << "╚═╝┴ ┴┴ ┴└─┘┴└─┴ ┴╩╚═ ╩ " << std::endl;
+
 	lcm::LCM lcm;
 
 	if (!lcm.good())

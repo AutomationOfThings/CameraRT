@@ -21,6 +21,8 @@ class stream_uri_response_t
 
         std::string uri;
 
+        int16_t    status_code;
+
         std::string response_message;
 
     public:
@@ -127,6 +129,9 @@ int stream_uri_response_t::_encodeNoHash(void *buf, int offset, int maxlen) cons
     tlen = __string_encode_array(buf, offset + pos, maxlen - pos, &uri_cstr, 1);
     if(tlen < 0) return tlen; else pos += tlen;
 
+    tlen = __int16_t_encode_array(buf, offset + pos, maxlen - pos, &this->status_code, 1);
+    if(tlen < 0) return tlen; else pos += tlen;
+
     char* response_message_cstr = (char*) this->response_message.c_str();
     tlen = __string_encode_array(buf, offset + pos, maxlen - pos, &response_message_cstr, 1);
     if(tlen < 0) return tlen; else pos += tlen;
@@ -152,6 +157,9 @@ int stream_uri_response_t::_decodeNoHash(const void *buf, int offset, int maxlen
     this->uri.assign(((const char*)buf) + offset + pos, __uri_len__ - 1);
     pos += __uri_len__;
 
+    tlen = __int16_t_decode_array(buf, offset + pos, maxlen - pos, &this->status_code, 1);
+    if(tlen < 0) return tlen; else pos += tlen;
+
     int32_t __response_message_len__;
     tlen = __int32_t_decode_array(buf, offset + pos, maxlen - pos, &__response_message_len__, 1);
     if(tlen < 0) return tlen; else pos += tlen;
@@ -167,13 +175,14 @@ int stream_uri_response_t::_getEncodedSizeNoHash() const
     int enc_size = 0;
     enc_size += this->ip_address.size() + 4 + 1;
     enc_size += this->uri.size() + 4 + 1;
+    enc_size += __int16_t_encoded_array_size(NULL, 1);
     enc_size += this->response_message.size() + 4 + 1;
     return enc_size;
 }
 
 uint64_t stream_uri_response_t::_computeHash(const __lcm_hash_ptr *)
 {
-    uint64_t hash = 0x3dff6cd473792915LL;
+    uint64_t hash = 0x726e0100be99395aLL;
     return (hash<<1) + ((hash>>63)&1);
 }
 

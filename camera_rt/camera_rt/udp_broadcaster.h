@@ -7,7 +7,7 @@
 #include <winsock2.h>
 #include <vector>
 
-class udp_socket_provider
+class udp_broadcaster
 {
 public:
 	void create();

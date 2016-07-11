@@ -1,10 +1,17 @@
 #include "stdafx.h"
 #include "lcm_handler.h"
 #include "channel_names.h"
-#include "udp_socket_provider.h"
+#include "udp_broadcaster.h"
 #include "uri_constants.h"
 #include "sun_api_response_parser.h"
+#include "Types\init_session_response_t.hpp"
+#include "Types\end_session_response_t.hpp"
+#include "Types\stream_uri_response_t.hpp"
 #include "Types\ptz_control_response_t.hpp"
+#include "Types\position_response_t.hpp"
+#include "Types\stop_ptz_control_response_t.hpp"
+#include "Types\status_codes_t.hpp"
+
 #include <ppltasks.h>
 
 using namespace std;
@@ -17,51 +24,93 @@ void lcm_handler::on_init_session_req(const lcm::ReceiveBuffer* rbuff,
 	std::cout << "Received init session req on channel: " << channel << 
 		"; Camera: " << req->ip_address << std::endl;
 	
-	this->session_ip = req->ip_address;
-	auto key_position = this->ip_client_map.find(session_ip);
+	auto key_position = this->ip_client_map.find(req->ip_address);
 	if (key_position == ip_client_map.end())
 	{
 		wstring username = this->convert_to_wstring(req->username);
 		wstring password = this->convert_to_wstring(req->password);
 
-		wstring main_uri = L"http://" + convert_to_wstring(session_ip);
+		wstring main_uri = L"http://" + convert_to_wstring(req->ip_address);
 		auto config = http_client_config();
 		auto login = credentials(username, password);
 		config.set_credentials(login);
 
 		http_client* client = new http_client(main_uri, config);
-		this->ip_client_map[session_ip] = client;
+
+		ptz_camera::init_session_response_t init_session_response;
+
+		client->request(methods::GET)
+			.then([&init_session_response, this, client, req]
+				(http_response response) -> pplx::task<wstring>
+		{
+			if (response.status_code() == status_codes::OK)
+			{
+				this->ip_client_map[req->ip_address] = client;
+				init_session_response.status_code =
+				ptz_camera::status_codes_t::OK;
+			}
+
+			else
+				init_session_response.status_code =
+				ptz_camera::status_codes_t::ERR;
+
+			return response.extract_string();
+
+		})
+			.then([&init_session_response, this](wstring response)
+		{
+			init_session_response.response_message =
+				this->convert_to_string(response);
+
+			this->lcm->publish(ptz_camera_channels::init_session_req_channel,
+				&init_session_response);
+		});
+
 	}
 
-	this->uri_req_sub = this->lcm->subscribe(ptz_camera_channels::stream_req_channel,
+	// at least one init session request was received
+	// so subscribe for other request types
+
+	this->uri_req_sub = this->lcm->subscribe(
+		ptz_camera_channels::stream_req_channel,
 		&lcm_handler::on_stream_uri_req, this);
+
 	this->ptz_control_req_sub = 
-		this->lcm->subscribe(ptz_camera_channels::ptz_control_req_channel,
+		this->lcm->subscribe(
+			ptz_camera_channels::ptz_control_req_channel,
 		&lcm_handler::on_ptz_conrol_req, this);
-	this->position_req_sub = 
-		this->lcm->subscribe(ptz_camera_channels::position_req_channel, &lcm_handler::on_position_req, this);
+
+	this->stop_ptz_control_req_sub = this->lcm->subscribe(
+		ptz_camera_channels::stop_ptz_control_req_channel,
+		&lcm_handler::on_stop_ptz_control_req, this);
+
+	this->position_req_sub = this->lcm->subscribe(
+		ptz_camera_channels::position_req_channel, 
+		&lcm_handler::on_position_req, this);
+
+	this->lcm->subscribe(ptz_camera_channels::end_session_req_channel, 
+		&lcm_handler::on_end_session_req, this);
 }
 
 void lcm_handler::on_end_session_req(const lcm::ReceiveBuffer* rbuff,
 	const std::string& channel,
 	const ptz_camera::end_session_request_t* req)
 {
+	std::cout << "Received end_session_req on channel: " << channel <<
+		"; Camera: " << req->ip_address << std::endl;
+
+	
 	this->ip_client_map.erase(req->ip_address);
-
-	this->lcm->unsubscribe(uri_req_sub);
-	this->lcm->unsubscribe(ptz_control_req_sub);
-
-	this->session_ip = "";
 }
 
 void lcm_handler::on_discovery_req(const lcm::ReceiveBuffer* rbuf,
 	const std::string& channel,
 	const ptz_camera::discovery_request_t* req)
 {
-	std::cout << "Received discovery req on channel: " << channel << std::endl;
+	std::cout << "Received discovery_req on channel: " << channel << std::endl;
 	std::cout << "Sending broadcast request... " << std::endl;
 
-	udp_socket_provider udp_handler;
+	udp_broadcaster udp_handler;
 	udp_handler.create();
 	SunApiTypes::BroadcastRequestPacket request_packet;
 	memset(&request_packet, 0, sizeof(request_packet));
@@ -80,8 +129,11 @@ void lcm_handler::on_discovery_req(const lcm::ReceiveBuffer* rbuf,
 	ptz_camera::discovery_response_t discovery_response;
 
 	discovery_response.total_cams = broadcast_responses.size();
+	discovery_response.status_code = ptz_camera::status_codes_t::OK;
+	discovery_response.response_message = "OK";
+
 	for (int i = 0; i < broadcast_responses.size(); i++)
-		discovery_response.camera_names.push_back(broadcast_responses[i].chIP);
+		discovery_response.ip_addresses.push_back(broadcast_responses[i].chIP);
 	
 	this->lcm->publish(ptz_camera_channels::discovery_res_channel, &discovery_response);
 }
@@ -91,14 +143,16 @@ void lcm_handler::on_stream_uri_req(const lcm::ReceiveBuffer* rbuf,
 	const ptz_camera::stream_uri_request_t* req)
 {
 	std::cout << "Received get_stream_uri req on channel: " << channel << 
-		"; Camera: " << req->ip_address << std::endl;	
+		"; Camera: " << req->ip_address << std::endl;
+
 	ptz_camera::stream_uri_response_t response;
 
-	if (req->ip_address != this->session_ip)
+	auto ip_client_pair = this->ip_client_map.find(req->ip_address);
+	if (ip_client_pair == ip_client_map.end())
 	{
 		string message = "Session not initialized for this ip... request dropped";
-		response.response_message = message;
-		return;
+		response.status_code = ptz_camera::status_codes_t::ERR;
+		response.response_message = message;		
 	}
 
 	else
@@ -140,6 +194,7 @@ void lcm_handler::on_stream_uri_req(const lcm::ReceiveBuffer* rbuf,
 
 		response.ip_address = convert_to_string(camera_ip);
 		response.uri = convert_to_string(uri.to_string());
+		response.status_code = ptz_camera::status_codes_t::OK;
 		response.response_message = "OK";
 	}
 
@@ -151,16 +206,23 @@ void lcm_handler::on_ptz_conrol_req(const lcm::ReceiveBuffer* rbuf,
 	const std::string& channel,
 	const ptz_camera::ptz_control_request_t* req)
 {
-	std::cout << "Received ptz control req on channel: " << channel <<
+	std::cout << "Received ptz_control_req on channel: " << channel <<
 		"; Camera: " << req->ip_address << std::endl;
 
-	auto req_copy = new ptz_camera::ptz_control_request_t;
-	*req_copy = *req;
+	ptz_camera::ptz_control_response_t control_response;
 
-	http_client* client = this->ip_client_map[req->ip_address];
-	auto camera_pan = to_wstring(req->pan_value);
-	auto camera_tilt = to_wstring(req->tilt_value);
-	auto camera_zoom = to_wstring(req->zoom_value);
+	auto ip_client_pair = this->ip_client_map.find(req->ip_address);
+	if (ip_client_pair == ip_client_map.end())
+	{
+		string message = "Session not initialized for this ip... request dropped";
+		cout << message << endl;
+		control_response.status_code = ptz_camera::status_codes_t::ERR;
+		control_response.response_message = message;
+	}
+
+	auto camera_pan = convert_to_wstring(req->pan_value);
+	auto camera_tilt = convert_to_wstring(req->tilt_value);
+	auto camera_zoom = convert_to_wstring(req->zoom_value);
 
 	uri_builder uri = uri_builder(U("/") + uri_constants::stw_cgi).
 		append_path(uri_constants::ptz_control_cgi);
@@ -168,8 +230,13 @@ void lcm_handler::on_ptz_conrol_req(const lcm::ReceiveBuffer* rbuf,
 	if (camera_pan == L"" && camera_tilt == L"" && camera_zoom == L"")
 		return; //TODO send warning to client since none of ptz was provided
 
-	uri.append_query(uri_constants::sub_menu, uri_constants::sub_menu_relative).
-		append_query(uri_constants::action, uri_constants::action_control);
+	if (req->mode == ptz_camera::ptz_control_request_t::CON)
+		uri.append_query(uri_constants::sub_menu, uri_constants::sub_menu_relative);
+
+	if (req->mode == ABSOLUTE)
+		uri.append_query(uri_constants::sub_menu, uri_constants::sub_menu_absolute);
+
+	uri.append_query(uri_constants::action, uri_constants::action_control);
 
 	if (camera_pan != L"")
 		uri.append_query(uri_constants::pan, camera_pan);
@@ -181,44 +248,123 @@ void lcm_handler::on_ptz_conrol_req(const lcm::ReceiveBuffer* rbuf,
 		uri.append_query(uri_constants::zoom, camera_zoom);
 
 	auto request = uri.to_string();
+	
+	control_response.ip_address = req->ip_address;
 
-	client->request(methods::GET, request)
-		.then( [] (http_response response) -> pplx::task<wstring>
-		{		
+	ip_client_pair->second->request(methods::GET, request)
+		.then( [&control_response] (http_response response) -> pplx::task<wstring>
+		{
 			if (response.status_code() == status_codes::OK)
-				return create_task([]() -> wstring { return L"OK"; });
+				control_response.status_code = 
+					ptz_camera::status_codes_t::OK;
 
 			else
-				return response.extract_string();
+				control_response.status_code = 
+					ptz_camera::status_codes_t::ERR;			
+
+			return response.extract_string();
 		
 		})
-		.then( [=] (wstring response)
-		{
-			ptz_camera::ptz_control_response_t control_response;
-
-			control_response.ip_address = req_copy->ip_address;
+		.then( [&control_response, this] (wstring response)
+		{					
 			control_response.response_message = 
 				this->convert_to_string(response);
 
 			this->lcm->publish(ptz_camera_channels::ptz_control_res_channel,
 				&control_response);
-
-			delete req_copy;
 		});
 
 }
+
+void lcm_handler::on_stop_ptz_control_req(const lcm::ReceiveBuffer* rbuf,
+	const std::string& channel,
+	const ptz_camera::stop_ptz_control_request_t* req)
+{
+	std::cout << "Received stop_ptz_control_req on channel: " << channel <<
+		"; Camera: " << req->ip_address << std::endl;
+
+	ptz_camera::stop_ptz_control_response_t stop_ptz_control_response;
+
+	auto ip_client_pair = this->ip_client_map.find(req->ip_address);
+	if (ip_client_pair == ip_client_map.end())
+	{
+		string message = "Session not initialized for this ip... request dropped";
+		cout << message << endl;
+		stop_ptz_control_response.status_code = ptz_camera::status_codes_t::ERR;
+		stop_ptz_control_response.response_message = message;
+	}
+
+	uri_builder uri = uri_builder(U("/") + uri_constants::stw_cgi).
+		append_path(uri_constants::ptz_control_cgi);
+
+	uri.append_query(uri_constants::sub_menu, uri_constants::sub_menu_stop).
+		append_query(uri_constants::action, uri_constants::action_control);
+
+	switch (req->operation_type)
+	{
+		case ptz_camera::stop_ptz_control_request_t::ALL:
+			uri.append_query(uri_constants::operation_type, uri_constants::all);
+			break;
+
+		case ptz_camera::stop_ptz_control_request_t::PAN:
+			uri.append_query(uri_constants::operation_type, uri_constants::pan);
+			break;
+
+		case ptz_camera::stop_ptz_control_request_t::TILT:
+			uri.append_query(uri_constants::operation_type, uri_constants::tilt);
+			break;
+
+		case ptz_camera::stop_ptz_control_request_t::ZOOM:
+			uri.append_query(uri_constants::operation_type, uri_constants::zoom);
+			break;
+	}
+
+	auto stop_ptz_control_request = uri.to_string();	
+	stop_ptz_control_response.ip_address = req->ip_address;
+
+	ip_client_pair->second->request(methods::GET, stop_ptz_control_request)
+		.then(
+			[&stop_ptz_control_response](http_response response) -> pplx::task<wstring>
+	{
+		if (response.status_code() == status_codes::OK)
+			stop_ptz_control_response.status_code =
+			ptz_camera::status_codes_t::OK;
+
+		else
+			stop_ptz_control_response.status_code = 
+			ptz_camera::status_codes_t::ERR;
+
+		return response.extract_string();
+
+	})
+		.then([&stop_ptz_control_response, this](wstring response)
+	{		
+		stop_ptz_control_response.response_message = convert_to_string(response);
+		this->lcm->publish(ptz_camera_channels::stop_ptz_control_res_channel,
+			&stop_ptz_control_response);
+	});
+
+
+}
+
 
 void lcm_handler::on_position_req(const lcm::ReceiveBuffer* rbuf,
 	const std::string& channel,
 	const ptz_camera::position_request_t* req)
 {
-	std::cout << "Received position req on channel: " << channel <<
+	std::cout << "Received position_req on channel: " << channel <<
 		"; Camera: " << req->ip_address << std::endl;
 
-	auto req_copy = new ptz_camera::position_request_t;
-	*req_copy = *req;
+	ptz_camera::position_response_t position_response;
 
-	http_client* client = this->ip_client_map[req->ip_address];
+	auto ip_client_pair = this->ip_client_map.find(req->ip_address);
+	if (ip_client_pair == ip_client_map.end())
+	{
+		string message = "Session not initialized for this ip... request dropped";
+		cout << message << endl;
+		position_response.status_code = ptz_camera::status_codes_t::ERR;
+		position_response.response_message = message;
+	}
 
 	uri_builder uri = uri_builder(U("/") + uri_constants::stw_cgi).
 		append_path(uri_constants::ptz_control_cgi);
@@ -230,24 +376,28 @@ void lcm_handler::on_position_req(const lcm::ReceiveBuffer* rbuf,
 	
 	auto request = uri.to_string();
 
-	client->request(methods::GET, request)
+	
+	position_response.ip_address = req->ip_address;
+
+	ip_client_pair->second->request(methods::GET, request)
 		.then(
-			[=](http_response response) -> pplx::task<wstring>
+			[&position_response](http_response response) -> pplx::task<wstring>
 		{
 			if (response.status_code() == status_codes::OK)
-				return response.extract_string();
+				position_response.status_code = 
+					ptz_camera::status_codes_t::OK;			
 
 			else
-				return response.extract_string();
+				position_response.status_code = 
+					ptz_camera::status_codes_t::ERR;			
+
+			return response.extract_string();
 
 		})
-		.then([=](wstring response_t)
+		.then([&position_response, this](wstring response)
 		{
 			sun_api::response_parser parser;
-			auto response_map = parser.parse_string(convert_to_string(response_t));
-
-			ptz_camera::position_response_t position_response;
-			position_response.ip_address = req_copy->ip_address;
+			auto response_map = parser.parse_string(convert_to_string(response));
 			position_response.pan_value = response_map["Pan"];
 			position_response.tilt_value = response_map["Tilt"];
 			position_response.zoom_value = response_map["Zoom"];
@@ -255,6 +405,5 @@ void lcm_handler::on_position_req(const lcm::ReceiveBuffer* rbuf,
 
 			this->lcm->publish(ptz_camera_channels::position_res_channel, 
 				&position_response);
-
 		});
 	}

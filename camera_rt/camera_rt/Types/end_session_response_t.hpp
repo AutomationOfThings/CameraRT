@@ -21,6 +21,10 @@ class end_session_response_t
 
         std::string response;
 
+        int16_t    status_code;
+
+        std::string response_message;
+
     public:
         /**
          * Encode a message into binary form.
@@ -125,6 +129,13 @@ int end_session_response_t::_encodeNoHash(void *buf, int offset, int maxlen) con
     tlen = __string_encode_array(buf, offset + pos, maxlen - pos, &response_cstr, 1);
     if(tlen < 0) return tlen; else pos += tlen;
 
+    tlen = __int16_t_encode_array(buf, offset + pos, maxlen - pos, &this->status_code, 1);
+    if(tlen < 0) return tlen; else pos += tlen;
+
+    char* response_message_cstr = (char*) this->response_message.c_str();
+    tlen = __string_encode_array(buf, offset + pos, maxlen - pos, &response_message_cstr, 1);
+    if(tlen < 0) return tlen; else pos += tlen;
+
     return pos;
 }
 
@@ -146,6 +157,16 @@ int end_session_response_t::_decodeNoHash(const void *buf, int offset, int maxle
     this->response.assign(((const char*)buf) + offset + pos, __response_len__ - 1);
     pos += __response_len__;
 
+    tlen = __int16_t_decode_array(buf, offset + pos, maxlen - pos, &this->status_code, 1);
+    if(tlen < 0) return tlen; else pos += tlen;
+
+    int32_t __response_message_len__;
+    tlen = __int32_t_decode_array(buf, offset + pos, maxlen - pos, &__response_message_len__, 1);
+    if(tlen < 0) return tlen; else pos += tlen;
+    if(__response_message_len__ > maxlen - pos) return -1;
+    this->response_message.assign(((const char*)buf) + offset + pos, __response_message_len__ - 1);
+    pos += __response_message_len__;
+
     return pos;
 }
 
@@ -154,12 +175,14 @@ int end_session_response_t::_getEncodedSizeNoHash() const
     int enc_size = 0;
     enc_size += this->ip_address.size() + 4 + 1;
     enc_size += this->response.size() + 4 + 1;
+    enc_size += __int16_t_encoded_array_size(NULL, 1);
+    enc_size += this->response_message.size() + 4 + 1;
     return enc_size;
 }
 
 uint64_t end_session_response_t::_computeHash(const __lcm_hash_ptr *)
 {
-    uint64_t hash = 0x27bb650bfec1afe4LL;
+    uint64_t hash = 0x29bdfd612b713b7cLL;
     return (hash<<1) + ((hash>>63)&1);
 }
 

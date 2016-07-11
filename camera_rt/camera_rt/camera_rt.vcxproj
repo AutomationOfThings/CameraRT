@@ -105,9 +105,12 @@
     <ClInclude Include="Types\position_response_t.hpp" />
     <ClInclude Include="Types\ptz_control_request_t.hpp" />
     <ClInclude Include="Types\ptz_control_response_t.hpp" />
+    <ClInclude Include="Types\status_codes_t.hpp" />
+    <ClInclude Include="Types\stop_ptz_control_request_t.hpp" />
+    <ClInclude Include="Types\stop_ptz_control_response_t.hpp" />
     <ClInclude Include="Types\stream_uri_request_t.hpp" />
     <ClInclude Include="Types\stream_uri_response_t.hpp" />
-    <ClInclude Include="udp_socket_provider.h" />
+    <ClInclude Include="udp_broadcaster.h" />
     <ClInclude Include="uri_constants.h" />
   </ItemGroup>
   <ItemGroup>
@@ -115,7 +118,7 @@
     <ClCompile Include="channel_names.cpp" />
     <ClCompile Include="lcm_handler.cpp" />
     <ClCompile Include="sun_api_response_parser.cpp" />
-    <ClCompile Include="udp_socket_provider.cpp" />
+    <ClCompile Include="udp_broadcaster.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>

@@ -6,22 +6,26 @@
 
 #include <lcm/lcm_coretypes.h>
 
-#ifndef __ptz_camera_init_session_response_t_hpp__
-#define __ptz_camera_init_session_response_t_hpp__
+#ifndef __ptz_camera_status_codes_t_hpp__
+#define __ptz_camera_status_codes_t_hpp__
 
-#include <string>
 
 namespace ptz_camera
 {
 
-class init_session_response_t
+class status_codes_t
 {
     public:
-        std::string ip_address;
-
-        int16_t    status_code;
-
-        std::string response_message;
+        // If you're using C++11 and are getting compiler errors saying things like
+        // ‘constexpr’ needed for in-class initialization of static data member
+        // then re-run lcm-gen with '--cpp-std=c++11' to generate code that is
+        // compliant with C++11
+        static const int16_t  OK = 1;
+        // If you're using C++11 and are getting compiler errors saying things like
+        // ‘constexpr’ needed for in-class initialization of static data member
+        // then re-run lcm-gen with '--cpp-std=c++11' to generate code that is
+        // compliant with C++11
+        static const int16_t  ERR = 2;
 
     public:
         /**
@@ -59,7 +63,7 @@ class init_session_response_t
         inline static int64_t getHash();
 
         /**
-         * Returns "init_session_response_t"
+         * Returns "status_codes_t"
          */
         inline static const char* getTypeName();
 
@@ -70,7 +74,7 @@ class init_session_response_t
         inline static uint64_t _computeHash(const __lcm_hash_ptr *p);
 };
 
-int init_session_response_t::encode(void *buf, int offset, int maxlen) const
+int status_codes_t::encode(void *buf, int offset, int maxlen) const
 {
     int pos = 0, tlen;
     int64_t hash = (int64_t)getHash();
@@ -84,7 +88,7 @@ int init_session_response_t::encode(void *buf, int offset, int maxlen) const
     return pos;
 }
 
-int init_session_response_t::decode(const void *buf, int offset, int maxlen)
+int status_codes_t::decode(const void *buf, int offset, int maxlen)
 {
     int pos = 0, thislen;
 
@@ -99,76 +103,40 @@ int init_session_response_t::decode(const void *buf, int offset, int maxlen)
     return pos;
 }
 
-int init_session_response_t::getEncodedSize() const
+int status_codes_t::getEncodedSize() const
 {
     return 8 + _getEncodedSizeNoHash();
 }
 
-int64_t init_session_response_t::getHash()
+int64_t status_codes_t::getHash()
 {
     static int64_t hash = _computeHash(NULL);
     return hash;
 }
 
-const char* init_session_response_t::getTypeName()
+const char* status_codes_t::getTypeName()
 {
-    return "init_session_response_t";
+    return "status_codes_t";
 }
 
-int init_session_response_t::_encodeNoHash(void *buf, int offset, int maxlen) const
+int status_codes_t::_encodeNoHash(void *, int, int) const
 {
-    int pos = 0, tlen;
-
-    char* ip_address_cstr = (char*) this->ip_address.c_str();
-    tlen = __string_encode_array(buf, offset + pos, maxlen - pos, &ip_address_cstr, 1);
-    if(tlen < 0) return tlen; else pos += tlen;
-
-    tlen = __int16_t_encode_array(buf, offset + pos, maxlen - pos, &this->status_code, 1);
-    if(tlen < 0) return tlen; else pos += tlen;
-
-    char* response_message_cstr = (char*) this->response_message.c_str();
-    tlen = __string_encode_array(buf, offset + pos, maxlen - pos, &response_message_cstr, 1);
-    if(tlen < 0) return tlen; else pos += tlen;
-
-    return pos;
+    return 0;
 }
 
-int init_session_response_t::_decodeNoHash(const void *buf, int offset, int maxlen)
+int status_codes_t::_decodeNoHash(const void *, int, int)
 {
-    int pos = 0, tlen;
-
-    int32_t __ip_address_len__;
-    tlen = __int32_t_decode_array(buf, offset + pos, maxlen - pos, &__ip_address_len__, 1);
-    if(tlen < 0) return tlen; else pos += tlen;
-    if(__ip_address_len__ > maxlen - pos) return -1;
-    this->ip_address.assign(((const char*)buf) + offset + pos, __ip_address_len__ - 1);
-    pos += __ip_address_len__;
-
-    tlen = __int16_t_decode_array(buf, offset + pos, maxlen - pos, &this->status_code, 1);
-    if(tlen < 0) return tlen; else pos += tlen;
-
-    int32_t __response_message_len__;
-    tlen = __int32_t_decode_array(buf, offset + pos, maxlen - pos, &__response_message_len__, 1);
-    if(tlen < 0) return tlen; else pos += tlen;
-    if(__response_message_len__ > maxlen - pos) return -1;
-    this->response_message.assign(((const char*)buf) + offset + pos, __response_message_len__ - 1);
-    pos += __response_message_len__;
-
-    return pos;
+    return 0;
 }
 
-int init_session_response_t::_getEncodedSizeNoHash() const
+int status_codes_t::_getEncodedSizeNoHash() const
 {
-    int enc_size = 0;
-    enc_size += this->ip_address.size() + 4 + 1;
-    enc_size += __int16_t_encoded_array_size(NULL, 1);
-    enc_size += this->response_message.size() + 4 + 1;
-    return enc_size;
+    return 0;
 }
 
-uint64_t init_session_response_t::_computeHash(const __lcm_hash_ptr *)
+uint64_t status_codes_t::_computeHash(const __lcm_hash_ptr *)
 {
-    uint64_t hash = 0x407fe9ad8541642cLL;
+    uint64_t hash = 0x0000000012345678LL;
     return (hash<<1) + ((hash>>63)&1);
 }
 

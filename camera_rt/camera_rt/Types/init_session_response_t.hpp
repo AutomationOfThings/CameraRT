@@ -19,6 +19,8 @@ class init_session_response_t
     public:
         std::string ip_address;
 
+        int16_t    status_code;
+
         std::string response_message;
 
     public:
@@ -121,6 +123,9 @@ int init_session_response_t::_encodeNoHash(void *buf, int offset, int maxlen) co
     tlen = __string_encode_array(buf, offset + pos, maxlen - pos, &ip_address_cstr, 1);
     if(tlen < 0) return tlen; else pos += tlen;
 
+    tlen = __int16_t_encode_array(buf, offset + pos, maxlen - pos, &this->status_code, 1);
+    if(tlen < 0) return tlen; else pos += tlen;
+
     char* response_message_cstr = (char*) this->response_message.c_str();
     tlen = __string_encode_array(buf, offset + pos, maxlen - pos, &response_message_cstr, 1);
     if(tlen < 0) return tlen; else pos += tlen;
@@ -139,6 +144,9 @@ int init_session_response_t::_decodeNoHash(const void *buf, int offset, int maxl
     this->ip_address.assign(((const char*)buf) + offset + pos, __ip_address_len__ - 1);
     pos += __ip_address_len__;
 
+    tlen = __int16_t_decode_array(buf, offset + pos, maxlen - pos, &this->status_code, 1);
+    if(tlen < 0) return tlen; else pos += tlen;
+
     int32_t __response_message_len__;
     tlen = __int32_t_decode_array(buf, offset + pos, maxlen - pos, &__response_message_len__, 1);
     if(tlen < 0) return tlen; else pos += tlen;
@@ -153,13 +161,14 @@ int init_session_response_t::_getEncodedSizeNoHash() const
 {
     int enc_size = 0;
     enc_size += this->ip_address.size() + 4 + 1;
+    enc_size += __int16_t_encoded_array_size(NULL, 1);
     enc_size += this->response_message.size() + 4 + 1;
     return enc_size;
 }
 
 uint64_t init_session_response_t::_computeHash(const __lcm_hash_ptr *)
 {
-    uint64_t hash = 0xf80f8b8aacfaf9aaLL;
+    uint64_t hash = 0x407fe9ad8541642cLL;
     return (hash<<1) + ((hash>>63)&1);
 }
 

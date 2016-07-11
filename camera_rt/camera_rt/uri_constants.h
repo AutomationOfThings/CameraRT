@@ -17,6 +17,7 @@ namespace uri_constants
 	const wstring action_control = L"control";
 	const wstring action_view = L"view";
 
+	const wstring sub_menu_stop = L"stop";
 	const wstring sub_menu_stream = L"stream";
 	const wstring sub_menu_query = L"query";
 	const wstring sub_menu_relative = L"relative";
@@ -33,6 +34,8 @@ namespace uri_constants
 	const wstring pan = L"Pan";
 	const wstring tilt = L"Tilt";
 	const wstring zoom = L"Zoom";
+	const wstring operation_type = L"OperationType";
+	const wstring all = L"All";
 }
 
 #endif // !__PtzCamera_Constants__

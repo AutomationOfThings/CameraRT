@@ -4,7 +4,7 @@
 
 #include <errno.h>
 #include <iostream>
-#include "udp_socket_provider.h"
+#include "udp_broadcaster.h"
 #include <vector>
 
 #define BUFLEN 512
@@ -13,7 +13,7 @@
 
 #pragma comment(lib, "Ws2_32.lib")
 
-void udp_socket_provider::create()
+void udp_broadcaster::create()
 {
 	WSADATA wsaData;
 	if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) 
@@ -42,7 +42,7 @@ void udp_socket_provider::create()
 	}	
 }
 
-void udp_socket_provider::send(void* request, size_t size)
+void udp_broadcaster::send(void* request, size_t size)
 {
 	memset(&_broadcast_address, '\0', sizeof(_broadcast_address));
 	_broadcast_address.sin_family = AF_INET;
@@ -62,7 +62,7 @@ void udp_socket_provider::send(void* request, size_t size)
 		perror("Error: sendto call failed");
 }
 
-std::vector<SunApiTypes::BroadcastResponsePacket> udp_socket_provider::recv()
+std::vector<SunApiTypes::BroadcastResponsePacket> udp_broadcaster::recv()
 {	
 	std::vector<SunApiTypes::BroadcastResponsePacket> broadcast_responses;
 
