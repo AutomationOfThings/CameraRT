@@ -67,7 +67,8 @@ public:
 private:
 	lcm::LCM* lcm;
 	std::unordered_map <std::string, http_client*> ip_client_map;
-	http_client* clients;
+
+	std::string const ok_message = "OK\n";
 
 	lcm::Subscription *uri_req_sub, *ptz_control_req_sub, 
 		*stop_ptz_control_req_sub,

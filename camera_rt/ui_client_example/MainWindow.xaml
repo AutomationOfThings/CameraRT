@@ -16,8 +16,20 @@
             <RowDefinition Height="18*"/>
             <RowDefinition Height="18*"/>
         </Grid.RowDefinitions>
+        <StackPanel Orientation="Horizontal"  Margin="14,0">
         <Button Grid.Row="0" Height="40" Width="120" Content="Discover" 
                 Command="{Binding DiscoverCommand}" />
+            <Separator Width="5"/>
+            <ScrollViewer VerticalScrollBarVisibility="Visible" Margin="10">
+                <TextBlock Width="180" Text="{Binding PtzControlResponse, Mode=TwoWay}"                       
+                       TextWrapping="Wrap" HorizontalAlignment="Stretch"
+                       ScrollViewer.VerticalScrollBarVisibility="Visible"
+                       ScrollViewer.CanContentScroll="True" />
+            </ScrollViewer>            
+            <TextBlock Width="50" Text="{Binding CurrentPanValue, Mode=TwoWay}" />
+            <TextBlock Width="50" Text="{Binding CurrentTiltValue, Mode=TwoWay}" />
+            <TextBlock Width="50" Text="{Binding CurrentZoomValue, Mode=TwoWay}" />
+        </StackPanel>
 
         <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Stretch" Margin="14,0">
             <ComboBox Width="120" Height="40"
@@ -25,8 +37,20 @@
             	HorizontalContentAlignment="Center"                      
             	SelectedIndex="{Binding SelectedCamera, Mode=TwoWay}" 
             	ItemsSource="{Binding CameraList}"  />
-            <Button Height="40" Width="120" Content="Init Session" Command="{Binding InitSessionCommand}" />
-            <Button Height="40" Width="120" Content="End Session" Command="{Binding EndSessionCommand}" />
+            <Button Height="40" Width="70" Content="Init Session" Command="{Binding InitSessionCommand}" />
+            <ScrollViewer VerticalScrollBarVisibility="Visible" Margin="10">
+                <TextBlock Width="80" Text="{Binding InitSessionResponse, Mode=TwoWay}"                       
+                       TextWrapping="Wrap" HorizontalAlignment="Stretch"
+                       ScrollViewer.VerticalScrollBarVisibility="Visible"
+                       ScrollViewer.CanContentScroll="True" />
+            </ScrollViewer>           
+            <Button Height="40" Width="70" Content="End Session" Command="{Binding EndSessionCommand}" />
+            <ScrollViewer VerticalScrollBarVisibility="Visible" Margin="10">
+                <TextBlock Width="80" Text="{Binding EndSessionResponse, Mode=TwoWay}"                       
+                       TextWrapping="Wrap" HorizontalAlignment="Stretch"
+                       ScrollViewer.VerticalScrollBarVisibility="Visible"
+                       ScrollViewer.CanContentScroll="True" />
+            </ScrollViewer>           
         </StackPanel>
 
         <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="14,0">
@@ -37,11 +61,18 @@
         <StackPanel Grid.Row="3" Orientation="Horizontal" Margin="14,0">
             <Button Content="Tilt Up" Height="40" Width="80" Command="{Binding TiltUpCommand}"/>
             <Button Content="Tilt Down" Height="40" Width="80" Command="{Binding TiltDownCommand}"/>
-            <Separator Width="50"/>
-            <TextBlock Width="40" Text="{Binding PtzControlResponse, Mode=TwoWay}" TextAlignment="Center" />
-            <TextBlock Width="50" Text="{Binding PanValue, Mode=TwoWay}" />
-            <TextBlock Width="50" Text="{Binding TiltValue, Mode=TwoWay}" />
-            <TextBlock Width="50" Text="{Binding ZoomValue, Mode=TwoWay}" />
+           
+            <StackPanel >
+                <Label Content="Continuous"/>
+                <CheckBox VerticalAlignment="Center" Width="25" IsChecked="{Binding IsContinuousMode}"/>
+            </StackPanel>
+            <TextBox Width="50" Text="{Binding PanValue, Mode=TwoWay}" />
+            <TextBox Width="50" Text="{Binding TiltValue, Mode=TwoWay}" />
+            <TextBox Width="50" Text="{Binding ZoomValue, Mode=TwoWay}" />
+            <Button Content="Move" Height="30" Width="40" Command="{Binding AbsMoveCommand}"/>
+            <Button Content="Stop" Height="30" Width="40" Command="{Binding StopMoveCommand}"/>
+
+
         </StackPanel>
 
         <StackPanel Grid.Row="4" Orientation="Horizontal" Margin="14,0">

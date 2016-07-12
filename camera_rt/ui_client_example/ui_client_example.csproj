@@ -81,10 +81,13 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Channels.cs" />
+    <Compile Include="Events\EndSessionResponseReceivedEvent.cs" />
+    <Compile Include="Events\InitSessionResponseReceivedEvent.cs" />
+    <Compile Include="Events\StopPtzControlResponseReceivedEvent.cs" />
     <Compile Include="Events\DiscoveryResponseReceivedEvent.cs" />
     <Compile Include="Events\PositionResponseReceivedEvent.cs" />
     <Compile Include="Events\PtzControlResponseReceivedEvent.cs" />
-    <Compile Include="Events\StreamUriResponseReceived.cs" />
+    <Compile Include="Events\StreamUriResponseReceivedEvent.cs" />
     <Compile Include="LCM_Types\end_session_request_t.cs" />
     <Compile Include="LCM_Types\end_session_response_t.cs" />
     <Compile Include="LCM_Types\init_session_request_t.cs" />
@@ -104,6 +107,9 @@
     <Compile Include="LCM_Types\ptz_control_request_t.cs" />
     <Compile Include="LCM_Types\stream_uri_request_t.cs" />
     <Compile Include="LCM_Types\stream_uri_response_t.cs" />
+    <Compile Include="Subscribers\EndSessionResponseHandler.cs" />
+    <Compile Include="Subscribers\InitSessionResponseHandler.cs" />
+    <Compile Include="Subscribers\StopPtzControlResponseHandler.cs" />
     <Compile Include="Subscribers\DiscoveryResponseHandler.cs" />
     <Compile Include="Subscribers\PositionResponseHandler.cs" />
     <Compile Include="Subscribers\PtzControlResponseHandler.cs" />

@@ -23,11 +23,11 @@ int _tmain(int argc, _TCHAR* argv[])
 		std::cout << "Couldn't allocate lcm\n";
 	}
 
-	std::cout << "success. \n";
+	std::cout << "OK\n";
 
 	lcm_handler handler(&lcm);
 	
-	std::cout << "Subscribing for reqs... ";
+	std::cout << "Subscribing for requests... ";
 	lcm.subscribe(
 		ptz_camera_channels::discovery_req_channel, 
 		&lcm_handler::on_discovery_req, &handler);
@@ -54,7 +54,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	lcm.subscribe(ptz_camera_channels::end_session_req_channel,
 		&lcm_handler::on_end_session_req, &handler);
 
-	//std::cout << "success. \n";
+	std::cout << "OK\n";
 
 	while (0 == lcm.handle());
 
