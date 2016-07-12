@@ -73,16 +73,26 @@ where status_code is like an enum-like field based on the following lcm-type:
     }
 
 The response object you will receive thus will have the:
+<ul>
+    <li>
     total_cams-- total number of cameras discovered
-    ip_addresses[] -- array with the ip_addresses for the discovered cams
-    status_code -- field with ok=1 and error=2 values
-    response_message -- a string field with details about the response (generally "OK" for good responses and error message for errors)
+    </li>
+    <li>
+    ip_addresses[]-- array with the ip_addresses for the discovered cams
+    </li>
+    <li>
+    status_code-- field with ok=1 and error=2 values
+    </li>
+    <li>
+    response_message-- string field with details about the response (generally "OK" for good responses and error message for errors)
+    </li>
+</ul>
 
 Before you can send any requests to the camera, you will need to send an `init_session_request_t` which contains login information for the camera. The runtime will send an `init_session_response_t` so that you can know whether the initialization was successful and prompt for any correction action if needed. Any session is retained indefinitely.
 
 All the requests supported are here for your reference:
 
-        `package ptz_camera;
+        package ptz_camera;
         
         struct discovery_request_t
         {
@@ -190,6 +200,6 @@ All the requests supported are here for your reference:
         	string zoom_value;
         	int16_t status_code;
         	string response_message;
-        }`
+        }
 
 Please look at the CameraRT\camera_rt\ui_client_example\MainWindowViewModel.cs class for complete samples.
