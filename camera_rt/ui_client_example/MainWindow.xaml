@@ -18,18 +18,8 @@
             <RowDefinition Height="14*"/>
         </Grid.RowDefinitions>
         <StackPanel Orientation="Horizontal"  Margin="14,0">
-        <Button Grid.Row="0" Height="40" Width="120" Content="Discover" 
+            <Button Grid.Row="0" Height="40" Width="120" Content="Discover" 
                 Command="{Binding DiscoverCommand}" />
-            <Separator Width="5"/>
-            <ScrollViewer VerticalScrollBarVisibility="Visible" Margin="10">
-                <TextBlock Width="180" Text="{Binding PtzControlResponse, Mode=TwoWay}"                       
-                       TextWrapping="Wrap" HorizontalAlignment="Stretch"
-                       ScrollViewer.VerticalScrollBarVisibility="Visible"
-                       ScrollViewer.CanContentScroll="True" />
-            </ScrollViewer>            
-            <TextBlock Width="50" Text="{Binding CurrentPanValue, Mode=TwoWay}" />
-            <TextBlock Width="50" Text="{Binding CurrentTiltValue, Mode=TwoWay}" />
-            <TextBlock Width="50" Text="{Binding CurrentZoomValue, Mode=TwoWay}" />
         </StackPanel>
 
         <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Stretch" Margin="14,0">
@@ -57,6 +47,16 @@
         <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="14,0">
             <Button Content="Pan Right" Height="40" Width="80" Command="{Binding PanRightCommand}"/>
             <Button Content="Pan Left" Height="40" Width="80" Command="{Binding PanLeftCommand}"/>
+            <Separator Width="5"/>
+            <ScrollViewer VerticalScrollBarVisibility="Visible" Margin="10">
+                <TextBlock Width="180" Text="{Binding PtzControlResponse, Mode=TwoWay}"                       
+                       TextWrapping="Wrap" HorizontalAlignment="Stretch"
+                       ScrollViewer.VerticalScrollBarVisibility="Visible"
+                       ScrollViewer.CanContentScroll="True" />
+            </ScrollViewer>
+            <TextBlock Width="25" Text="{Binding CurrentPanValue, Mode=TwoWay}" />
+            <TextBlock Width="25" Text="{Binding CurrentTiltValue, Mode=TwoWay}" />
+            <TextBlock Width="25" Text="{Binding CurrentZoomValue, Mode=TwoWay}" />
         </StackPanel>
 
         <StackPanel Grid.Row="3" Orientation="Horizontal" Margin="14,0">
