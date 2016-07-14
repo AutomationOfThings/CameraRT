@@ -80,7 +80,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="Channels.cs" />
+    <Compile Include="ResponseChannelNames.cs" />
+    <Compile Include="RequestChannelNames.cs" />
+    <Compile Include="Events\PresetMoveResponseReceivedEvent.cs" />
+    <Compile Include="Events\PresetConfigResponseReceivedEvent.cs" />
     <Compile Include="Events\EndSessionResponseReceivedEvent.cs" />
     <Compile Include="Events\InitSessionResponseReceivedEvent.cs" />
     <Compile Include="Events\StopPtzControlResponseReceivedEvent.cs" />
@@ -92,6 +95,10 @@
     <Compile Include="LCM_Types\end_session_response_t.cs" />
     <Compile Include="LCM_Types\init_session_request_t.cs" />
     <Compile Include="LCM_Types\init_session_response_t.cs" />
+    <Compile Include="LCM_Types\preset_config_request_t.cs" />
+    <Compile Include="LCM_Types\preset_config_response_t.cs" />
+    <Compile Include="LCM_Types\preset_move_request_t.cs" />
+    <Compile Include="LCM_Types\preset_move_response_t.cs" />
     <Compile Include="LCM_Types\ptz_control_response_t.cs" />
     <Compile Include="LCM_Types\status_codes_t.cs" />
     <Compile Include="LCM_Types\stop_ptz_control_request_t.cs" />
@@ -107,6 +114,8 @@
     <Compile Include="LCM_Types\ptz_control_request_t.cs" />
     <Compile Include="LCM_Types\stream_uri_request_t.cs" />
     <Compile Include="LCM_Types\stream_uri_response_t.cs" />
+    <Compile Include="Subscribers\PresetMoveResponseHandler.cs" />
+    <Compile Include="Subscribers\PresetConfigResponseHandler.cs" />
     <Compile Include="Subscribers\EndSessionResponseHandler.cs" />
     <Compile Include="Subscribers\InitSessionResponseHandler.cs" />
     <Compile Include="Subscribers\StopPtzControlResponseHandler.cs" />

@@ -9,12 +9,13 @@
         Title="MainWindow" Height="350" Width="525">
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="18*"/>
-            <RowDefinition Height="18*"/>
-            <RowDefinition Height="18*"/>
-            <RowDefinition Height="18*"/>
-            <RowDefinition Height="18*"/>
-            <RowDefinition Height="18*"/>
+            <RowDefinition Height="14*"/>
+            <RowDefinition Height="14*"/>
+            <RowDefinition Height="14*"/>
+            <RowDefinition Height="14*"/>
+            <RowDefinition Height="14*"/>
+            <RowDefinition Height="14*"/>
+            <RowDefinition Height="14*"/>
         </Grid.RowDefinitions>
         <StackPanel Orientation="Horizontal"  Margin="14,0">
         <Button Grid.Row="0" Height="40" Width="120" Content="Discover" 
@@ -84,6 +85,25 @@
             <Button Height="40" Width="120" Content="GetStreamURI" Command="{Binding GetStreamUriCommand}"  />
             <ScrollViewer VerticalScrollBarVisibility="Visible" Margin="10">
                 <TextBlock Width="200" Text="{Binding StreamUri, Mode=TwoWay}"                       
+                       TextWrapping="Wrap" HorizontalAlignment="Stretch"
+                       ScrollViewer.VerticalScrollBarVisibility="Visible"
+                       ScrollViewer.CanContentScroll="True" />
+            </ScrollViewer>
+        </StackPanel>
+
+        <StackPanel Grid.Row="6" Orientation="Horizontal" Margin="14,0">
+            <TextBox Width="50" Text="{Binding PresetNumber, Mode=TwoWay}" />
+            <TextBox Width="50" Text="{Binding PresetName, Mode=TwoWay}" />
+            <Button Height="40" Width="60" Content="Set Preset" Command="{Binding PresetSetCommand}"  />
+            <ScrollViewer VerticalScrollBarVisibility="Visible" Margin="10">
+                <TextBlock Width="100" Text="{Binding PresetSetResponse, Mode=TwoWay}"                       
+                       TextWrapping="Wrap" HorizontalAlignment="Stretch"
+                       ScrollViewer.VerticalScrollBarVisibility="Visible"
+                       ScrollViewer.CanContentScroll="True" />
+            </ScrollViewer>
+            <Button Height="40" Width="60" Content="Move" Command="{Binding PresetMoveCommand}"  />
+            <ScrollViewer VerticalScrollBarVisibility="Visible" Margin="10">
+                <TextBlock Width="100" Text="{Binding PresetMoveResponse, Mode=TwoWay}"                       
                        TextWrapping="Wrap" HorizontalAlignment="Stretch"
                        ScrollViewer.VerticalScrollBarVisibility="Visible"
                        ScrollViewer.CanContentScroll="True" />

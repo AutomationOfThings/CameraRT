@@ -2,7 +2,7 @@
 #ifndef  __ptz_camera_channels__
 #define  __ptz_camera_channels__
 
-namespace ptz_camera_channels
+namespace ptz_camera_req_channels
 {	
 	extern const char* discovery_req_channel;
 	extern const char* discovery_res_channel;
@@ -18,6 +18,10 @@ namespace ptz_camera_channels
 	extern const char* position_res_channel;
 	extern const char* stop_ptz_control_req_channel;
 	extern const char* stop_ptz_control_res_channel;
-}
+	extern const char* preset_config_req_channel;
+	extern const char* preset_config_res_channel;
+	extern const char* preset_move_req_channel; 
+	extern const char* preset_move_res_channel; 
+};
 
 #endif // ! __ptz_camera_channels__

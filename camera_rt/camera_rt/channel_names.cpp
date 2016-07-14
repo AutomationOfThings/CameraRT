@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "channel_names.h"
-namespace ptz_camera_channels
+namespace ptz_camera_req_channels
 {
 	const char* discovery_req_channel = "DISCOVERYREQ";
 	const char* discovery_res_channel = "DISCOVERYRES";
@@ -16,4 +16,8 @@ namespace ptz_camera_channels
 	const char* position_res_channel = "POSITIONRES";
 	const char* stop_ptz_control_req_channel = "STOPPTZCONTROLREQ";
 	const char* stop_ptz_control_res_channel = "STOPPTZCONTROLRES";
-}
+	const char* preset_config_req_channel = "PRESETCONFREQ";
+	const char* preset_config_res_channel = "PRESETCONFRES";
+	const char* preset_move_req_channel = "PRESETMOVEREQ";
+	const char* preset_move_res_channel = "PRESETMOVERES";
+ }
