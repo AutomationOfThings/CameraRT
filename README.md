@@ -1,3 +1,15 @@
+<h1> WHAT </h1>
+
+This a program that shall be used to control multiple network cameras (SNP 6320H -- http://www.cctvcentersl.es/upload/Catalogos/SNP-6320_6320H_eng.pdf). The program shall susbcribe and publish requests and responses through UDP multicast datagrams. It is designed to run with a UI/GUI application that shall publish requests (see MORE section) defined using the lcm language (https://lcm-proj.github.io/type_specification.html) to control the network cameras, and it shall perform the appropriate http level requests to the network cameras. In the same way, it shall also translate the http responses to appropriate higher level messages (see MORE section).  As such, the program is called the camera runtime (CameraRT).
+
+<h1> DEPENDENCIES </h1>
+<ul>
+<li>  lcm (https://lcm-proj.github.io/) -> library for internetwork request/response message passing through UDP multicast</li>
+<li> cpprestsdk(https://github.com/Microsoft/cpprestsdk) -> library for handling http request/response passing to the network cameras
+</ul>
+
+<h1> HOW </h1>
+
 The UI shall use the lcmdotnet library to publish data to the RT. lcm (https://lcm-proj.github.io/) allows communication between processes via UDP multicast packets. The RT and UI shall agree to send and receive pre-defined types using the lcm type specification language. 
 
 For example, one of the types defined looks like:
@@ -90,6 +102,7 @@ The response object you will receive thus will have the:
 
 Before you can send any requests to the camera, you will need to send an `init_session_request_t` which contains login information for the camera. The runtime will send an `init_session_response_t` so that you can know whether the initialization was successful and prompt for any correction action if needed. Any session is retained indefinitely.
 
+<h1> MORE </h1>
 All the requests supported are here for your reference:
 
         package ptz_camera;
