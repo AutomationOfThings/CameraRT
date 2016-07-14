@@ -26,7 +26,7 @@ Follow the following steps to publish and subscribe data with lcm.
 <ol>
 <li> Copy all the types to a directory in your project </li>
 <li> Copy CameraRT\camera_rt\ui_client_example\LCM\lcm.dll to a directory in your project and add a reference to it</li>
-<li> Copy CameraRT\camera_rt\ui_client_example\Channels.cs to a directory in your project </li>
+<li> Copy CameraRT\camera_rt\ui_client_example\RequestChannelNames.cs and CameraRT\camera_rt\ui_client_example\ResponseChannelNames.cs  to a directory in your project. These are the channel names which your lcm instance is going to use </li>
 </ol>
 
 You are now ready to use lcm. 
