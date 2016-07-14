@@ -9,7 +9,7 @@ namespace ui_client_example.Subscribers
     {
         public void MessageReceived(LCM.LCM.LCM lcm, string channel, LCMDataInputStream data_stream)
         {
-            if (channel == RequestChannelNames.preset_move_res_channel)
+            if (channel == ResponseChannelNames.preset_move_res_channel)
             {
                 var response = new preset_move_response_t(data_stream);
                 dynamic app = ui_client_example.App.Current;

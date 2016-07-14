@@ -11,6 +11,7 @@ using System.Runtime.CompilerServices;
 using System.Threading.Tasks.Dataflow;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Threading;
 //using LCM = LCM.LCM;
 
 namespace ui_client_example
@@ -60,10 +61,15 @@ namespace ui_client_example
         public int SelectedCamera { get; set; }
 
         private LoginDialog _loginDialog; 
-        private readonly LCM.LCM.LCM _lcm;       
+        private readonly LCM.LCM.LCM _lcm;
+        private CancellationTokenSource _positionPollerTokenSource = 
+            new CancellationTokenSource();
 
         public MainWindowViewModel()
         {
+
+            _lcm = LCM.LCM.LCM.Singleton;
+
             SubscribeForResponses();
 
             DiscoverCommand = new DelegateCommand(OnDiscoverCommand);
@@ -81,8 +87,6 @@ namespace ui_client_example
             StopMoveCommand = new DelegateCommand(OnStopMoveCommand);
             PresetSetCommand = new DelegateCommand(OnPresetSetCommand);
             PresetMoveCommand = new DelegateCommand(OnPresetMoveCommand);
-
-            _lcm = LCM.LCM.LCM.Singleton;
 
             dynamic app = ui_client_example.App.Current;
             var ea = (EventAggregator)app.EA;
@@ -119,10 +123,11 @@ namespace ui_client_example
         {
             var preset_set_request = new preset_config_request_t()
             {
-                ip_address = CameraList[SelectedCamera],
+                ip_address = CameraList == null || CameraList.Count == 0 ?
+                "127.0.0.1" : CameraList[SelectedCamera],
                 mode = preset_config_request_t.ADD,
-                preset_name = PresetName,
-                preset_number = PresetNumber,
+                preset_name = PresetName??"preset1",
+                preset_number = PresetNumber??"1",
 
                 // these values are not needed and will be removed
                 pan_value = "",
@@ -137,8 +142,9 @@ namespace ui_client_example
         {
             var preset_move_request = new preset_move_request_t()
             {
-                ip_address = CameraList[SelectedCamera],
-                preset_number = PresetNumber
+                ip_address = CameraList == null || CameraList.Count == 0 ?
+                "127.0.0.1" : CameraList[SelectedCamera],
+                preset_number = PresetNumber??""
             };
 
             _lcm.Publish(RequestChannelNames.preset_move_req_channel, preset_move_request);
@@ -193,7 +199,8 @@ namespace ui_client_example
         {
             var ptzStopControlRequest = new stop_ptz_control_request_t()
             {
-                ip_address = CameraList[SelectedCamera],
+                ip_address = CameraList == null || CameraList.Count == 0 ?
+                "127.0.0.1" : CameraList[SelectedCamera],
                 operation_type = stop_ptz_control_request_t.ALL
             };
 
@@ -206,7 +213,8 @@ namespace ui_client_example
             var ptzControlRequest = new ptz_control_request_t()
             {
                 mode = ptz_control_request_t.ABS,
-                ip_address = CameraList[SelectedCamera],
+                ip_address = CameraList == null || CameraList.Count == 0 ?
+                "127.0.0.1" : CameraList[SelectedCamera],
                 pan_value = PanValue??"",
                 tilt_value = TiltValue??"",
                 zoom_value = ZoomValue??""
@@ -220,9 +228,11 @@ namespace ui_client_example
         {
             var endSessionRequest = new end_session_request_t()
             {
-                ip_address = CameraList[SelectedCamera]
+                ip_address = CameraList == null || CameraList.Count == 0 ?
+                "127.0.0.1" : CameraList[SelectedCamera]
             };
-           
+
+            _positionPollerTokenSource.Cancel();            
             _lcm.Publish(RequestChannelNames.end_session_req_channel, endSessionRequest);
         }
 
@@ -278,10 +288,10 @@ namespace ui_client_example
             
             _lcm.Publish(RequestChannelNames.init_session_req_channel, initSessionRequest);           
 
-            PollCameraPosition();
+            PollCameraPosition(_positionPollerTokenSource.Token);
         }
 
-        private void PollCameraPosition()
+        private void PollCameraPosition(CancellationToken cToken)
         {
             var positionRequest = new position_request_t()
             {
@@ -293,10 +303,10 @@ namespace ui_client_example
                 async x =>
                 {
                     _lcm.Publish(RequestChannelNames.position_req_channel, x);
-                    await Task.Delay(TimeSpan.FromSeconds(5)).
+                    await Task.Delay(TimeSpan.FromSeconds(5), cToken).
                         ConfigureAwait(false);
                     pollingBlock.Post(x); //post the same request again for polling
-                });
+                }, new ExecutionDataflowBlockOptions { CancellationToken = cToken });
             
             pollingBlock.Post(positionRequest); //seed and start the poller
         }
@@ -306,7 +316,8 @@ namespace ui_client_example
             var ptzControlRequest = new ptz_control_request_t()
             {
                 mode = ptz_control_request_t.REL,
-                ip_address = CameraList[SelectedCamera],
+                ip_address = CameraList == null || CameraList.Count == 0 ?
+                "127.0.0.1" : CameraList[SelectedCamera],
                 pan_value = "5",
                 tilt_value = "",
                 zoom_value = ""
@@ -323,7 +334,8 @@ namespace ui_client_example
             var ptzControlRequest = new ptz_control_request_t()
             {
                 mode = ptz_control_request_t.REL,
-                ip_address = CameraList[SelectedCamera],
+                ip_address = CameraList == null || CameraList.Count == 0 ?
+                "127.0.0.1" : CameraList[SelectedCamera],
                 pan_value = "-5",
                 tilt_value = "",
                 zoom_value = ""
@@ -340,7 +352,8 @@ namespace ui_client_example
             var ptzControlRequest = new ptz_control_request_t()
             {
                 mode = ptz_control_request_t.REL,
-                ip_address = CameraList[SelectedCamera],
+                ip_address = CameraList == null || CameraList.Count == 0 ?
+                "127.0.0.1" : CameraList[SelectedCamera],
                 pan_value = "",
                 tilt_value = "-5",
                 zoom_value = ""
@@ -357,7 +370,8 @@ namespace ui_client_example
             var ptzControlRequest = new ptz_control_request_t()
             {
                 mode = ptz_control_request_t.REL,
-                ip_address = CameraList[SelectedCamera],
+                ip_address = CameraList == null || CameraList.Count == 0 ?
+                "127.0.0.1" : CameraList[SelectedCamera],
                 pan_value = "",
                 tilt_value = "5",
                 zoom_value = ""
@@ -371,12 +385,13 @@ namespace ui_client_example
 
         private void OnZoomInCommand()
         {
-            var zoom_v = (Convert.ToDouble(CurrentZoomValue) + 1).ToString();
+            var zoom_v = (Convert.ToDouble(CurrentZoomValue??"1") + 1).ToString();
          
             var ptzControlRequest = new ptz_control_request_t()
             {
                 mode = ptz_control_request_t.ABS,
-                ip_address = CameraList[SelectedCamera],   
+                ip_address = CameraList == null || CameraList.Count == 0 ?
+                "127.0.0.1" : CameraList[SelectedCamera],   
                 pan_value = "",
                 tilt_value = "",             
                 zoom_value = zoom_v,
@@ -394,12 +409,13 @@ namespace ui_client_example
 
         private void OnZoomOutCommand()
         {
-            var zoom_value = (Convert.ToDouble(CurrentZoomValue) - 1).ToString(); 
+            var zoom_value = (Convert.ToDouble(CurrentZoomValue??"1") - 1).ToString(); 
 
             var ptzControlRequest = new ptz_control_request_t()
             {
                 mode = ptz_control_request_t.ABS,
-                ip_address = CameraList[SelectedCamera],
+                ip_address = CameraList == null || CameraList.Count == 0 ?
+                "127.0.0.1" : CameraList[SelectedCamera],
                 pan_value = "",
                 tilt_value = "",
                 zoom_value = zoom_value
@@ -426,13 +442,11 @@ namespace ui_client_example
 
         private void OnGetStreamUriCommand()
         {
-           
-            var ip_address = CameraList[SelectedCamera];       
-
             // IMPORTANT: SET unspecifed fields to the empty string ""
             var streamUriRequest = new stream_uri_request_t()
-            {                
-                ip_address = ip_address,
+            {
+                ip_address = CameraList == null || CameraList.Count == 0 ?
+                "127.0.0.1" : CameraList[SelectedCamera],
                 profile = "1",
                 codec_type = "",
                 resolution = "",

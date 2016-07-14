@@ -15,7 +15,6 @@
 #include "Types\status_codes_t.hpp"
 
 #include <ppltasks.h>
-#include <set>
 
 using namespace std;
 using namespace concurrency;
@@ -83,7 +82,16 @@ void lcm_handler::on_init_session_req(const lcm::ReceiveBuffer* rbuff,
 
 				return response.extract_string();
 			}
-				
+
+			catch (const http_exception& e)
+			{
+				cout << "Caught http exception: " << e.what() << endl;
+				return create_task([e, this]() -> wstring
+				{
+					return convert_to_wstring(e.what());
+				});
+			}	
+
 			catch (const exception& e)
 			{
 				cout << "Caught exception: " << e.what() << endl;
@@ -98,7 +106,7 @@ void lcm_handler::on_init_session_req(const lcm::ReceiveBuffer* rbuff,
 		{
 			string string_response = this->convert_to_string(response);
 			init_session_response->response_message = string_response;
-			this->lcm->publish(ptz_camera_req_channels::init_session_res_channel,
+			this->lcm->publish(ptz_camera_res_channels::init_session_res_channel,
 				init_session_response.get());
 		});
 	}
@@ -111,7 +119,7 @@ void lcm_handler::on_init_session_req(const lcm::ReceiveBuffer* rbuff,
 		init_session_response->response_message = message;
 		init_session_response->status_code = ptz_camera::status_codes_t::OK;
 
-		this->lcm->publish(ptz_camera_req_channels::init_session_res_channel,
+		this->lcm->publish(ptz_camera_res_channels::init_session_res_channel,
 			init_session_response.get());
 	}
 	
@@ -148,7 +156,7 @@ void lcm_handler::on_end_session_req(const lcm::ReceiveBuffer* rbuff,
 	}
 
 
-	this->lcm->publish(ptz_camera_req_channels::end_session_res_channel,
+	this->lcm->publish(ptz_camera_res_channels::end_session_res_channel,
 		&end_session_response);
 	
 }
@@ -186,7 +194,7 @@ void lcm_handler::on_discovery_req(const lcm::ReceiveBuffer* rbuf,
 		discovery_response.ip_addresses.push_back(broadcast_responses[i].chIP);
 	
 	std::cout << "Sending brodcast response... ";
-	this->lcm->publish(ptz_camera_req_channels::discovery_res_channel, &discovery_response);
+	this->lcm->publish(ptz_camera_res_channels::discovery_res_channel, &discovery_response);
 	std::cout << lcm_handler::ok_message;
 }
 
@@ -258,7 +266,7 @@ void lcm_handler::on_stream_uri_req(const lcm::ReceiveBuffer* rbuf,
 	}
 
 	std::cout << "Sending get_stream_uri response... ";
-	lcm->publish(ptz_camera_req_channels::stream_res_channel, &stream_uri_response);
+	lcm->publish(ptz_camera_res_channels::stream_res_channel, &stream_uri_response);
 	std::cout << lcm_handler::ok_message;
 }
 
@@ -287,7 +295,7 @@ void lcm_handler::send_ptz_control_request(ptz_camera::ptz_control_request_t req
 		control_response->response_message = message;
 
 		std::cout << "Sending ptz_control response... ";
-		this->lcm->publish(ptz_camera_req_channels::ptz_control_res_channel,
+		this->lcm->publish(ptz_camera_res_channels::ptz_control_res_channel,
 			control_response.get());
 		std::cout << lcm_handler::ok_message;
 	}
@@ -376,7 +384,7 @@ void lcm_handler::send_ptz_control_request(ptz_camera::ptz_control_request_t req
 				this->convert_to_string(response);
 
 			std::cout << "Sending ptz_control response... ";
-			this->lcm->publish(ptz_camera_req_channels::ptz_control_res_channel,
+			this->lcm->publish(ptz_camera_res_channels::ptz_control_res_channel,
 				control_response.get());
 			std::cout << lcm_handler::ok_message;
 		});
@@ -402,7 +410,7 @@ void lcm_handler::on_stop_ptz_control_req(const lcm::ReceiveBuffer* rbuf,
 		stop_ptz_control_response->status_code = ptz_camera::status_codes_t::ERR;
 		stop_ptz_control_response->response_message = message;
 		std::cout << "Sending stop_ptz_control response... ";
-		this->lcm->publish(ptz_camera_req_channels::stop_ptz_control_res_channel,
+		this->lcm->publish(ptz_camera_res_channels::stop_ptz_control_res_channel,
 			stop_ptz_control_response.get());
 		std::cout << lcm_handler::ok_message;
 	}
@@ -483,7 +491,7 @@ void lcm_handler::on_stop_ptz_control_req(const lcm::ReceiveBuffer* rbuf,
 			stop_ptz_control_response->
 				response_message = convert_to_string(response);	
 			std::cout << "Sending stop_ptz_control response... ";
-			this->lcm->publish(ptz_camera_req_channels::stop_ptz_control_res_channel,
+			this->lcm->publish(ptz_camera_res_channels::stop_ptz_control_res_channel,
 				stop_ptz_control_response.get());
 			std::cout << lcm_handler::ok_message;
 		});
@@ -510,7 +518,7 @@ void lcm_handler::on_position_req(const lcm::ReceiveBuffer* rbuf,
 		position_response->status_code = ptz_camera::status_codes_t::ERR;
 		position_response->response_message = message;
 		std::cout << "Sending get_position response... ";
-		this->lcm->publish(ptz_camera_req_channels::position_res_channel,
+		this->lcm->publish(ptz_camera_res_channels::position_res_channel,
 			position_response.get());
 		std::cout << lcm_handler::ok_message;
 	}
@@ -579,7 +587,7 @@ void lcm_handler::on_position_req(const lcm::ReceiveBuffer* rbuf,
 				position_response->response_message = "OK";
 
 				std::cout << "Sending get_position response... ";
-				this->lcm->publish(ptz_camera_req_channels::position_res_channel,
+				this->lcm->publish(ptz_camera_res_channels::position_res_channel,
 					position_response.get());
 				std::cout << lcm_handler::ok_message;
 			});
@@ -606,7 +614,7 @@ void lcm_handler::on_preset_config_request(const lcm::ReceiveBuffer* rbuf,
 		config_response->status_code = ptz_camera::status_codes_t::ERR;
 		config_response->response_message = message;
 		std::cout << "Sending preset_config response... ";
-		this->lcm->publish(ptz_camera_req_channels::preset_config_res_channel,
+		this->lcm->publish(ptz_camera_res_channels::preset_config_res_channel,
 			config_response.get());
 		std::cout << lcm_handler::ok_message;
 	}
@@ -626,23 +634,23 @@ void lcm_handler::on_preset_config_request(const lcm::ReceiveBuffer* rbuf,
 			case ptz_camera::preset_config_request_t::ADD:
 			{
 				uri.append_query(uri_constants::action, uri_constants::action_add);
-				uri.append_query(uri_constants::preset, req->preset_number);
-				uri.append_query(uri_constants::name, req->preset_name);
+				uri.append_query(uri_constants::preset, convert_to_wstring(req->preset_number));
+				uri.append_query(uri_constants::name, convert_to_wstring(req->preset_name));
 				break;
 			}
 
 			case ptz_camera::preset_config_request_t::UDPATE:
 			{
 				uri.append_query(uri_constants::action, uri_constants::action_update);
-				uri.append_query(uri_constants::preset, req->preset_number);
-				uri.append_query(uri_constants::name, req->preset_name);
+				uri.append_query(uri_constants::preset, convert_to_wstring(req->preset_number));
+				uri.append_query(uri_constants::name, convert_to_wstring(req->preset_name));
 				break;
 			}
 
 			case ptz_camera::preset_config_request_t::REMOVE:
 			{
 				uri.append_query(uri_constants::action, uri_constants::action_remove);
-				uri.append_query(uri_constants::preset, req->preset_number);
+				uri.append_query(uri_constants::preset, convert_to_wstring(req->preset_number));
 				break;
 			}
 		}
@@ -653,9 +661,8 @@ void lcm_handler::on_preset_config_request(const lcm::ReceiveBuffer* rbuf,
 
 		std::cout << "Sending preset_config request... ";
 		ip_client_pair->second->request(methods::GET, request)
-			.then(
-				[config_response, this](
-					pplx::task<http_response> request_task) -> pplx::task<wstring>
+		.then([config_response, this](
+			pplx::task<http_response> request_task) -> pplx::task<wstring>
 		{
 			try
 			{
@@ -680,7 +687,7 @@ void lcm_handler::on_preset_config_request(const lcm::ReceiveBuffer* rbuf,
 
 			catch (const exception& e)
 			{
-				cout << "Caught exception: " << e.what() << endl;
+				cout << "Caught exception: " << e.what() << std::endl;
 				return create_task([e, this]() -> wstring
 				{
 					return this->convert_to_wstring(e.what());
@@ -688,17 +695,16 @@ void lcm_handler::on_preset_config_request(const lcm::ReceiveBuffer* rbuf,
 			}
 
 		})
-			.then([config_response, this](wstring response)
+		.then([config_response, this](wstring response)
 		{
 			config_response->
 				response_message = convert_to_string(response);
 			std::cout << "Sending preset_config response... ";
-			this->lcm->publish(ptz_camera_req_channels::preset_config_res_channel,
+			this->lcm->publish(ptz_camera_res_channels::preset_config_res_channel,
 				config_response.get());
 			std::cout << lcm_handler::ok_message;
 		});
 	}
-
 }
 
 void lcm_handler::on_preset_move_request(const lcm::ReceiveBuffer* rbuf,
@@ -721,7 +727,7 @@ void lcm_handler::on_preset_move_request(const lcm::ReceiveBuffer* rbuf,
 		move_response->status_code = ptz_camera::status_codes_t::ERR;
 		move_response->response_message = message;
 		std::cout << "Sending preset_move response... ";
-		this->lcm->publish(ptz_camera_req_channels::preset_move_res_channel,
+		this->lcm->publish(ptz_camera_res_channels::preset_move_res_channel,
 			move_response.get());
 		std::cout << lcm_handler::ok_message;
 	}
@@ -735,7 +741,7 @@ void lcm_handler::on_preset_move_request(const lcm::ReceiveBuffer* rbuf,
 			append_path(uri_constants::ptz_control_cgi);
 
 		uri.append_query(uri_constants::sub_menu, uri_constants::sub_menu_preset).
-			append_query(uri_constants::preset, req->preset_number);		
+			append_query(uri_constants::preset, convert_to_wstring(req->preset_number));
 
 		auto request = uri.to_string();
 		std::cout << lcm_handler::ok_message;
@@ -743,7 +749,7 @@ void lcm_handler::on_preset_move_request(const lcm::ReceiveBuffer* rbuf,
 
 		std::cout << "Sending preset_config request... ";
 		ip_client_pair->second->request(methods::GET, request)
-			.then(
+		.then(
 				[move_response, this](
 					pplx::task<http_response> request_task) -> pplx::task<wstring>
 		{
@@ -778,13 +784,14 @@ void lcm_handler::on_preset_move_request(const lcm::ReceiveBuffer* rbuf,
 			}
 
 		})
-			.then([move_response, this](wstring response)
+		.then([move_response, this](wstring response)
 		{
 			move_response->
 				response_message = convert_to_string(response);
 			std::cout << "Sending preset_move response... ";
-			this->lcm->publish(ptz_camera_req_channels::preset_move_res_channel,
+			this->lcm->publish(ptz_camera_res_channels::preset_move_res_channel,
 				move_response.get());
 			std::cout << lcm_handler::ok_message;
 		});
 	}
+}
