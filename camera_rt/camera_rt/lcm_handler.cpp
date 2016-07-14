@@ -110,8 +110,7 @@ void lcm_handler::on_init_session_req(const lcm::ReceiveBuffer* rbuff,
 				init_session_response.get());
 		});
 	}
-
-
+	
 	else
 	{
 		string message = "Client for ip: " + req->ip_address + " already exists\n";
