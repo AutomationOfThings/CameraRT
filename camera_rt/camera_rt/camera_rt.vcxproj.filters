@@ -99,6 +99,18 @@
     <ClInclude Include="udp_broadcaster.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="Types\preset_config_request_t.hpp">
+      <Filter>RequestResponseTypes</Filter>
+    </ClInclude>
+    <ClInclude Include="Types\preset_config_response_t.hpp">
+      <Filter>RequestResponseTypes</Filter>
+    </ClInclude>
+    <ClInclude Include="Types\preset_move_request_t.hpp">
+      <Filter>RequestResponseTypes</Filter>
+    </ClInclude>
+    <ClInclude Include="Types\preset_move_response_t.hpp">
+      <Filter>RequestResponseTypes</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">

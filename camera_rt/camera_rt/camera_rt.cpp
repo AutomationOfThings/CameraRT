@@ -29,31 +29,37 @@ int _tmain(int argc, _TCHAR* argv[])
 	
 	std::cout << "Subscribing for requests... ";
 	lcm.subscribe(
-		ptz_camera_channels::discovery_req_channel, 
+		ptz_camera_req_channels::discovery_req_channel, 
 		&lcm_handler::on_discovery_req, &handler);
 
-	lcm.subscribe(ptz_camera_channels::init_session_req_channel, 
+	lcm.subscribe(ptz_camera_req_channels::init_session_req_channel, 
 		&lcm_handler::on_init_session_req, &handler);
 
 	lcm.subscribe(
-		ptz_camera_channels::stream_req_channel,
+		ptz_camera_req_channels::stream_req_channel,
 		&lcm_handler::on_stream_uri_req, &handler);
 
 	lcm.subscribe(
-			ptz_camera_channels::ptz_control_req_channel,
+			ptz_camera_req_channels::ptz_control_req_channel,
 			&lcm_handler::on_ptz_conrol_req, &handler);
 
 	lcm.subscribe(
-		ptz_camera_channels::stop_ptz_control_req_channel,
+		ptz_camera_req_channels::stop_ptz_control_req_channel,
 		&lcm_handler::on_stop_ptz_control_req, &handler);
 
 	lcm.subscribe(
-		ptz_camera_channels::position_req_channel,
+		ptz_camera_req_channels::position_req_channel,
 		&lcm_handler::on_position_req, &handler);
 
-	lcm.subscribe(ptz_camera_channels::end_session_req_channel,
+	lcm.subscribe(ptz_camera_req_channels::end_session_req_channel,
 		&lcm_handler::on_end_session_req, &handler);
 
+	lcm.subscribe(ptz_camera_req_channels::preset_config_req_channel,
+		&lcm_handler::on_preset_config_request, &handler);
+
+	lcm.subscribe(ptz_camera_req_channels::preset_move_req_channel,
+		&lcm_handler::on_preset_move_request, &handler);
+	
 	std::cout << "OK\n";
 
 	while (0 == lcm.handle());

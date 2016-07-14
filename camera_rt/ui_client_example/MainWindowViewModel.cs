@@ -11,6 +11,7 @@ using System.Runtime.CompilerServices;
 using System.Threading.Tasks.Dataflow;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Threading;
 //using LCM = LCM.LCM;
 
 namespace ui_client_example
@@ -30,18 +31,47 @@ namespace ui_client_example
         public ICommand LoginCommand { get; set; }
         public ICommand AbsMoveCommand { get; set; }
         public ICommand StopMoveCommand { get; set; }
+        public ICommand PresetSetCommand { get; set; }
+        public ICommand PresetMoveCommand { get; set; }
+
+        public string CurrentPanValue { get; set; }
+        public string CurrentTiltValue { get; set; }
+        public string CurrentZoomValue { get; set; }
+
+        public string PanValue { get; set; }
+        public string TiltValue { get; set; }
+        public string ZoomValue { get; set; }
+
         public string Username { get; set; }      
         public string Password { get; set; }
+
         public bool IsContinuousMode { get; set; }
+
         public string InitSessionResponse { get; set; }
         public string EndSessionResponse { get; set; }
+        public string PresetSetResponse { get; set; }
+        public string PresetMoveResponse { get; set; }
+        public string PtzControlResponse { get; set; }
+
+        public string PresetName { get; set; }
+        public string PresetNumber { get; set; }
+
+        public ObservableCollection<string> CameraList { get; set; }
+        public string StreamUri { get; set; }
+        public int SelectedCamera { get; set; }
 
         private LoginDialog _loginDialog; 
         private readonly LCM.LCM.LCM _lcm;
-       
+        private CancellationTokenSource _positionPollerTokenSource = 
+            new CancellationTokenSource();
 
         public MainWindowViewModel()
         {
+
+            _lcm = LCM.LCM.LCM.Singleton;
+
+            SubscribeForResponses();
+
             DiscoverCommand = new DelegateCommand(OnDiscoverCommand);
             InitSessionCommand = new DelegateCommand(OnInitSessionCommand);
             EndSessionCommand = new DelegateCommand(OnEndSessionCommand);
@@ -55,8 +85,8 @@ namespace ui_client_example
             LoginCommand = new DelegateCommand<LoginDialog>(OnLoginCommand);
             AbsMoveCommand = new DelegateCommand(OnAbsMoveCommand);
             StopMoveCommand = new DelegateCommand(OnStopMoveCommand);
-
-            _lcm = LCM.LCM.LCM.Singleton;
+            PresetSetCommand = new DelegateCommand(OnPresetSetCommand);
+            PresetMoveCommand = new DelegateCommand(OnPresetMoveCommand);
 
             dynamic app = ui_client_example.App.Current;
             var ea = (EventAggregator)app.EA;
@@ -67,39 +97,115 @@ namespace ui_client_example
             ea.GetEvent<StopPtzControlResponseReceivedEvent>().Subscribe(OnStopPtzControlResponseReceived);
             ea.GetEvent<InitSessionResponseReceivedEvent>().Subscribe(OnInitSessionResponseReceived);
             ea.GetEvent<EndSessionResponseReceivedEvent>().Subscribe(OnEndSessionResponseReceived);
+            ea.GetEvent<PresetConfigResponseReceivedEvent>().Subscribe(OnPresetConfigResponseReceived);
+            ea.GetEvent<PresetMoveResponseReceivedEvent>().Subscribe(OnPresetMoveResponseReceived);
+        }
+
+        private void SubscribeForResponses()
+        {
+            _lcm.Subscribe(ResponseChannelNames.discovery_res_channel, new DiscoveryResponseHandler());
+
+            _lcm.Subscribe(ResponseChannelNames.init_session_res_channel, new InitSessionResponseHandler());
+            _lcm.Subscribe(ResponseChannelNames.end_session_res_channel, new EndSessionResponseHandler());
+
+            _lcm.Subscribe(ResponseChannelNames.position_res_channel, new PositionResponseHandler());
+
+            _lcm.Subscribe(ResponseChannelNames.preset_config_res_channel, new PresetConfigResponseHandler());
+            _lcm.Subscribe(ResponseChannelNames.preset_move_res_channel, new PresetMoveResponseHandler());
+
+            _lcm.Subscribe(ResponseChannelNames.ptz_control_res_channel, new PtzControlResponseHandler());
+            _lcm.Subscribe(ResponseChannelNames.stop_ptz_control_res_channel, new StopPtzControlResponseHandler());
+      
+            _lcm.Subscribe(ResponseChannelNames.stream_res_channel, new StreamUriResponseHandler());
+        }
+
+        private void OnPresetSetCommand()
+        {
+            var preset_set_request = new preset_config_request_t()
+            {
+                ip_address = CameraList == null || CameraList.Count == 0 ?
+                "127.0.0.1" : CameraList[SelectedCamera],
+                mode = preset_config_request_t.ADD,
+                preset_name = PresetName??"preset1",
+                preset_number = PresetNumber??"1",
+
+                // these values are not needed and will be removed
+                pan_value = "",
+                zoom_value = "",
+                tilt_value = ""
+            };
+
+            _lcm.Publish(RequestChannelNames.preset_config_req_channel, preset_set_request);
+        }
+
+        private void OnPresetMoveCommand()
+        {
+            var preset_move_request = new preset_move_request_t()
+            {
+                ip_address = CameraList == null || CameraList.Count == 0 ?
+                "127.0.0.1" : CameraList[SelectedCamera],
+                preset_number = PresetNumber??""
+            };
+
+            _lcm.Publish(RequestChannelNames.preset_move_req_channel, preset_move_request);
+        }
+        
+        private void OnPresetMoveResponseReceived(preset_move_response_t move_response)
+        {
+            PresetMoveResponse = move_response.response_message;
+            OnPropertyChanged("PresetMoveResponse");
+
+            if (move_response.status_code == status_codes_t.ERR)
+                MessageBox.Show(PresetMoveResponse);            
+        }
+
+        private void OnPresetConfigResponseReceived(preset_config_response_t config_response)
+        {
+            PresetSetResponse = config_response.response_message;
+            OnPropertyChanged("PresetSetResponse");
+
+            if (config_response.status_code == status_codes_t.ERR)
+                MessageBox.Show(PresetSetResponse);
         }
 
         private void OnEndSessionResponseReceived(end_session_response_t end_session_response)
         {
            EndSessionResponse = end_session_response.response_message;
            OnPropertyChanged("EndSessionResponse");
+
+            if (end_session_response.status_code == status_codes_t.ERR)
+                MessageBox.Show(EndSessionResponse);
         }
 
         private void OnInitSessionResponseReceived(init_session_response_t init_session_response)
         {
             InitSessionResponse = init_session_response.response_message;
             OnPropertyChanged("InitSessionResponse");
+
+            if (init_session_response.status_code == status_codes_t.ERR)
+                MessageBox.Show(EndSessionResponse, "Try again");
         }
 
         private void OnStopPtzControlResponseReceived(stop_ptz_control_response_t stop_ptz_control_response)
         {
-            if (stop_ptz_control_response.status_code == status_codes_t.ERR)
-                MessageBox.Show(stop_ptz_control_response.response_message);
-
             PtzControlResponse = stop_ptz_control_response.response_message;
             OnPropertyChanged("PtzControlResponse");
+
+            if (stop_ptz_control_response.status_code == status_codes_t.ERR)
+                MessageBox.Show(stop_ptz_control_response.response_message);
         }
 
         private void OnStopMoveCommand()
         {
             var ptzStopControlRequest = new stop_ptz_control_request_t()
             {
-                ip_address = CameraList[SelectedCamera],
+                ip_address = CameraList == null || CameraList.Count == 0 ?
+                "127.0.0.1" : CameraList[SelectedCamera],
                 operation_type = stop_ptz_control_request_t.ALL
             };
 
-            _lcm.Publish(Channels.stop_ptz_control_req_channel, ptzStopControlRequest);
-            _lcm.Subscribe(Channels.stop_ptz_control_res_channel, new StopPtzControlResponseHandler());
+            _lcm.Publish(RequestChannelNames.stop_ptz_control_req_channel, ptzStopControlRequest);
+         
         }
 
         private void OnAbsMoveCommand()
@@ -107,14 +213,14 @@ namespace ui_client_example
             var ptzControlRequest = new ptz_control_request_t()
             {
                 mode = ptz_control_request_t.ABS,
-                ip_address = CameraList[SelectedCamera],
+                ip_address = CameraList == null || CameraList.Count == 0 ?
+                "127.0.0.1" : CameraList[SelectedCamera],
                 pan_value = PanValue??"",
                 tilt_value = TiltValue??"",
                 zoom_value = ZoomValue??""
             };
-
-            _lcm.Subscribe(Channels.ptz_control_res_channel, new PtzControlResponseHandler());
-            _lcm.Publish(Channels.ptz_control_req_channel, ptzControlRequest);
+                        
+            _lcm.Publish(RequestChannelNames.ptz_control_req_channel, ptzControlRequest);
           
         }
 
@@ -122,18 +228,21 @@ namespace ui_client_example
         {
             var endSessionRequest = new end_session_request_t()
             {
-                ip_address = CameraList[SelectedCamera]
+                ip_address = CameraList == null || CameraList.Count == 0 ?
+                "127.0.0.1" : CameraList[SelectedCamera]
             };
 
-            _lcm.Subscribe(Channels.end_session_res_channel, new EndSessionResponseHandler());
-            _lcm.Publish(Channels.end_session_req_channel, endSessionRequest);
-           
+            _positionPollerTokenSource.Cancel();            
+            _lcm.Publish(RequestChannelNames.end_session_req_channel, endSessionRequest);
         }
 
         private void OnDiscoveryResponseReceived(discovery_response_t discovery_response)
         {
             CameraList = new ObservableCollection<string>(discovery_response.ip_addresses);
             OnPropertyChanged("CameraList");
+
+            if (discovery_response.status_code == status_codes_t.ERR)
+                MessageBox.Show(discovery_response.response_message);
         }
 
         private void OnPositionResponseReceived(position_response_t position_response)
@@ -144,23 +253,18 @@ namespace ui_client_example
             OnPropertyChanged("CurrentPanValue");
             OnPropertyChanged("CurrentTiltValue");
             OnPropertyChanged("CurrentZoomValue");
-        }
 
-        public string CurrentPanValue { get; set; }
-        public string CurrentTiltValue { get; set; }
-        public string CurrentZoomValue { get; set; }
-
-        public string PanValue { get; set; }
-        public string TiltValue { get; set; }
-        public string ZoomValue { get; set; }
+            if (position_response.status_code == status_codes_t.ERR)
+                MessageBox.Show(position_response.response_message);
+        }       
 
         private void OnPtzControlResponseReceived(ptz_control_response_t ptz_control_response)
         {
-            if (ptz_control_response.status_code == status_codes_t.ERR)
-                MessageBox.Show(ptz_control_response.response_message);
-
             PtzControlResponse = ptz_control_response.response_message;
             OnPropertyChanged("PtzControlResponse");
+
+            if (ptz_control_response.status_code == status_codes_t.ERR)
+                MessageBox.Show(ptz_control_response.response_message);
         }
 
         private void OnInitSessionCommand()
@@ -171,7 +275,7 @@ namespace ui_client_example
             _loginDialog.Show();
         }
 
-        public void OnLoginCommand(LoginDialog loginDialog)
+        private void OnLoginCommand(LoginDialog loginDialog)
         {          
             _loginDialog.Close();
             var initSessionRequest = new init_session_request_t()
@@ -181,14 +285,13 @@ namespace ui_client_example
                 username = Username??" ",
                 password = Password??" "
             };
+            
+            _lcm.Publish(RequestChannelNames.init_session_req_channel, initSessionRequest);           
 
-            _lcm.Subscribe(Channels.init_session_res_channel, new InitSessionResponseHandler());
-            _lcm.Publish(Channels.init_session_req_channel, initSessionRequest);           
-
-            PollCameraPosition();
+            PollCameraPosition(_positionPollerTokenSource.Token);
         }
 
-        private void PollCameraPosition()
+        private void PollCameraPosition(CancellationToken cToken)
         {
             var positionRequest = new position_request_t()
             {
@@ -199,15 +302,13 @@ namespace ui_client_example
             pollingBlock = new ActionBlock<position_request_t>(
                 async x =>
                 {
-                    _lcm.Publish(Channels.position_req_channel, x);
-                    await Task.Delay(TimeSpan.FromSeconds(5)).
+                    _lcm.Publish(RequestChannelNames.position_req_channel, x);
+                    await Task.Delay(TimeSpan.FromSeconds(5), cToken).
                         ConfigureAwait(false);
                     pollingBlock.Post(x); //post the same request again for polling
-                });
-
-            _lcm.Subscribe(Channels.position_res_channel, new PositionResponseHandler());
+                }, new ExecutionDataflowBlockOptions { CancellationToken = cToken });
+            
             pollingBlock.Post(positionRequest); //seed and start the poller
-
         }
 
         private void OnPanLeftCommand()
@@ -215,7 +316,8 @@ namespace ui_client_example
             var ptzControlRequest = new ptz_control_request_t()
             {
                 mode = ptz_control_request_t.REL,
-                ip_address = CameraList[SelectedCamera],
+                ip_address = CameraList == null || CameraList.Count == 0 ?
+                "127.0.0.1" : CameraList[SelectedCamera],
                 pan_value = "5",
                 tilt_value = "",
                 zoom_value = ""
@@ -223,9 +325,8 @@ namespace ui_client_example
 
             if (IsContinuousMode)
                 ptzControlRequest.mode = ptz_control_request_t.CON;
-
-            _lcm.Subscribe(Channels.ptz_control_res_channel, new PtzControlResponseHandler());
-            _lcm.Publish(Channels.ptz_control_req_channel, ptzControlRequest);          
+          
+            _lcm.Publish(RequestChannelNames.ptz_control_req_channel, ptzControlRequest);          
         }
       
         private void OnPanRightCommand()
@@ -233,7 +334,8 @@ namespace ui_client_example
             var ptzControlRequest = new ptz_control_request_t()
             {
                 mode = ptz_control_request_t.REL,
-                ip_address = CameraList[SelectedCamera],
+                ip_address = CameraList == null || CameraList.Count == 0 ?
+                "127.0.0.1" : CameraList[SelectedCamera],
                 pan_value = "-5",
                 tilt_value = "",
                 zoom_value = ""
@@ -241,9 +343,8 @@ namespace ui_client_example
 
             if (IsContinuousMode)
                 ptzControlRequest.mode = ptz_control_request_t.CON;
-
-            _lcm.Subscribe(Channels.ptz_control_res_channel, new PtzControlResponseHandler());
-            _lcm.Publish(Channels.ptz_control_req_channel, ptzControlRequest);            
+        
+            _lcm.Publish(RequestChannelNames.ptz_control_req_channel, ptzControlRequest);            
         }
 
         private void OnTiltUpCommand()
@@ -251,7 +352,8 @@ namespace ui_client_example
             var ptzControlRequest = new ptz_control_request_t()
             {
                 mode = ptz_control_request_t.REL,
-                ip_address = CameraList[SelectedCamera],
+                ip_address = CameraList == null || CameraList.Count == 0 ?
+                "127.0.0.1" : CameraList[SelectedCamera],
                 pan_value = "",
                 tilt_value = "-5",
                 zoom_value = ""
@@ -260,8 +362,7 @@ namespace ui_client_example
             if (IsContinuousMode)
                 ptzControlRequest.mode = ptz_control_request_t.CON;
 
-            _lcm.Subscribe(Channels.ptz_control_res_channel, new PtzControlResponseHandler());
-            _lcm.Publish(Channels.ptz_control_req_channel, ptzControlRequest);          
+            _lcm.Publish(RequestChannelNames.ptz_control_req_channel, ptzControlRequest);          
         }
 
         private void OnTiltDownCommand()
@@ -269,7 +370,8 @@ namespace ui_client_example
             var ptzControlRequest = new ptz_control_request_t()
             {
                 mode = ptz_control_request_t.REL,
-                ip_address = CameraList[SelectedCamera],
+                ip_address = CameraList == null || CameraList.Count == 0 ?
+                "127.0.0.1" : CameraList[SelectedCamera],
                 pan_value = "",
                 tilt_value = "5",
                 zoom_value = ""
@@ -277,20 +379,19 @@ namespace ui_client_example
 
             if (IsContinuousMode)
                 ptzControlRequest.mode = ptz_control_request_t.CON;
-
-            _lcm.Subscribe(Channels.ptz_control_res_channel, new PtzControlResponseHandler());
-            _lcm.Publish(Channels.ptz_control_req_channel, ptzControlRequest);
-          
+           
+            _lcm.Publish(RequestChannelNames.ptz_control_req_channel, ptzControlRequest);
         }
 
         private void OnZoomInCommand()
         {
-            var zoom_v = (Convert.ToDouble(CurrentZoomValue) + 1).ToString();
+            var zoom_v = (Convert.ToDouble(CurrentZoomValue??"1") + 1).ToString();
          
             var ptzControlRequest = new ptz_control_request_t()
             {
                 mode = ptz_control_request_t.ABS,
-                ip_address = CameraList[SelectedCamera],   
+                ip_address = CameraList == null || CameraList.Count == 0 ?
+                "127.0.0.1" : CameraList[SelectedCamera],   
                 pan_value = "",
                 tilt_value = "",             
                 zoom_value = zoom_v,
@@ -303,19 +404,18 @@ namespace ui_client_example
                 ptzControlRequest.zoom_value = "1"; //probably means zoom speed
             }
 
-            _lcm.Subscribe(Channels.ptz_control_res_channel, new PtzControlResponseHandler());
-            _lcm.Publish(Channels.ptz_control_req_channel, ptzControlRequest);
-           
+            _lcm.Publish(RequestChannelNames.ptz_control_req_channel, ptzControlRequest);
         }
 
         private void OnZoomOutCommand()
         {
-            var zoom_value = (Convert.ToDouble(CurrentZoomValue) - 1).ToString(); 
+            var zoom_value = (Convert.ToDouble(CurrentZoomValue??"1") - 1).ToString(); 
 
             var ptzControlRequest = new ptz_control_request_t()
             {
                 mode = ptz_control_request_t.ABS,
-                ip_address = CameraList[SelectedCamera],
+                ip_address = CameraList == null || CameraList.Count == 0 ?
+                "127.0.0.1" : CameraList[SelectedCamera],
                 pan_value = "",
                 tilt_value = "",
                 zoom_value = zoom_value
@@ -326,40 +426,27 @@ namespace ui_client_example
                 ptzControlRequest.mode = ptz_control_request_t.CON;
                 ptzControlRequest.zoom_value = "-1"; //probably means zoom speed
             }
-
-            _lcm.Subscribe(Channels.ptz_control_res_channel, new PtzControlResponseHandler());
-            _lcm.Publish(Channels.ptz_control_req_channel, ptzControlRequest);
-          
+            
+            _lcm.Publish(RequestChannelNames.ptz_control_req_channel, ptzControlRequest);
         }
 
 
         private void OnStreamUriResponseReceived(stream_uri_response_t res)
         {
-            if (res.status_code == status_codes_t.ERR)
-                MessageBox.Show(res.response_message);
-
             StreamUri = res.uri;
             OnPropertyChanged("StreamUri");
-        }
 
-
-        public ObservableCollection<string> CameraList {get; set;}
-
-        public string PtzControlResponse { get; set;}
-
-        public string StreamUri { get; set; }
-
-        public int SelectedCamera { get; set; }
+            if (res.status_code == status_codes_t.ERR)
+                MessageBox.Show(res.response_message);
+        }      
 
         private void OnGetStreamUriCommand()
         {
-           
-            var ip_address = CameraList[SelectedCamera];       
-
             // IMPORTANT: SET unspecifed fields to the empty string ""
             var streamUriRequest = new stream_uri_request_t()
-            {                
-                ip_address = ip_address,
+            {
+                ip_address = CameraList == null || CameraList.Count == 0 ?
+                "127.0.0.1" : CameraList[SelectedCamera],
                 profile = "1",
                 codec_type = "",
                 resolution = "",
@@ -367,19 +454,14 @@ namespace ui_client_example
                 compression_level = "",
                 channel = ""
             };
-
-            _lcm.Subscribe(Channels.stream_res_channel, new StreamUriResponseHandler());
-            _lcm.Publish(Channels.stream_req_channel, streamUriRequest);
-           
+            
+            _lcm.Publish(RequestChannelNames.stream_req_channel, streamUriRequest);
         }
 
         private void OnDiscoverCommand()
         {
             var discoveryRequest = new discovery_request_t();
-
-            _lcm.Subscribe(Channels.discovery_res_channel, new DiscoveryResponseHandler());
-            _lcm.Publish(Channels.discovery_req_channel, discoveryRequest);
-           
+            _lcm.Publish(RequestChannelNames.discovery_req_channel, discoveryRequest);
         }
 
 

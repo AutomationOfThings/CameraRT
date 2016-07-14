@@ -8,6 +8,8 @@
 #include "Types\ptz_control_request_t.hpp"
 #include "Types\position_request_t.hpp"
 #include "Types\stop_ptz_control_request_t.hpp"
+#include "Types\preset_config_request_t.hpp"
+#include "Types\preset_move_request_t.hpp"
 
 #include <cpprest\http_client.h>
 #include <cpprest\filestream.h>
@@ -64,9 +66,19 @@ public:
 		const std::string& channel,
 		const ptz_camera::position_request_t* req);
 
+	void lcm_handler::on_preset_config_request(const lcm::ReceiveBuffer* rbuf,
+		const std::string& channel,
+		const ptz_camera::preset_config_request_t* req);
+
+	void lcm_handler::on_preset_move_request(const lcm::ReceiveBuffer* rbuf,
+		const std::string& channel,
+		const ptz_camera::preset_move_request_t* req);
+
 private:
 	lcm::LCM* lcm;
 	std::unordered_map <std::string, http_client*> ip_client_map;
+
+	void lcm_handler::send_ptz_control_request(ptz_camera::ptz_control_request_t req);
 
 	std::string const ok_message = "OK\n";
 
@@ -83,6 +95,7 @@ private:
 	{
 		return std::string(value.begin(), value.end());
 	}
+
 
 
 };
