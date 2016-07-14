@@ -53,8 +53,8 @@ namespace ui_client_example
         public string PresetMoveResponse { get; set; }
         public string PtzControlResponse { get; set; }
 
-        public string PresetName;
-        public string PresetNumber;
+        public string PresetName { get; set; }
+        public string PresetNumber { get; set; }
 
         public ObservableCollection<string> CameraList { get; set; }
         public string StreamUri { get; set; }

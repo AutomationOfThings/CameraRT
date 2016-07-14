@@ -746,7 +746,7 @@ void lcm_handler::on_preset_move_request(const lcm::ReceiveBuffer* rbuf,
 		std::cout << lcm_handler::ok_message;
 		std::cout << "Request: " << convert_to_string(request) << std::endl;
 
-		std::cout << "Sending preset_config request... ";
+		std::cout << "Sending preset_move request... ";
 		ip_client_pair->second->request(methods::GET, request)
 		.then(
 				[move_response, this](
