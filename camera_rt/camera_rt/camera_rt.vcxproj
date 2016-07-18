@@ -14,6 +14,7 @@
     <ProjectGuid>{245E0921-7AAC-4972-9941-08E1EF841D8A}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>camera_rt</RootNamespace>
+    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -21,12 +22,13 @@
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
+    <UseOfMfc>false</UseOfMfc>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
-    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <WholeProgramOptimization>false</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
@@ -54,7 +56,8 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -71,7 +74,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>G:\camera_project\camera_rt\camera_rt\lcm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -90,7 +93,9 @@
     <ClInclude Include="..\lcm\lcm-cpp.hpp" />
     <ClInclude Include="..\lcm\lcm.h" />
     <ClInclude Include="channel_names.h" />
+    <ClInclude Include="messages.h" />
     <ClInclude Include="lcm_handler.h" />
+    <ClInclude Include="ptz_cgi_request_response_handler.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="SunApiRequestResponseTypes\BroadcastTypes.h" />
     <ClInclude Include="sun_api_response_parser.h" />
@@ -101,6 +106,7 @@
     <ClInclude Include="Types\end_session_response_t.hpp" />
     <ClInclude Include="Types\init_session_request_t.hpp" />
     <ClInclude Include="Types\init_session_response_t.hpp" />
+    <ClInclude Include="Types\output_request_t.hpp" />
     <ClInclude Include="Types\position_request_t.hpp" />
     <ClInclude Include="Types\position_response_t.hpp" />
     <ClInclude Include="Types\preset_config_request_t.hpp" />
@@ -109,18 +115,25 @@
     <ClInclude Include="Types\preset_move_response_t.hpp" />
     <ClInclude Include="Types\ptz_control_request_t.hpp" />
     <ClInclude Include="Types\ptz_control_response_t.hpp" />
+    <ClInclude Include="Types\start_program_request_t.hpp" />
+    <ClInclude Include="Types\start_program_response_t.hpp" />
     <ClInclude Include="Types\status_codes_t.hpp" />
+    <ClInclude Include="Types\stop_program_request_t.hpp" />
+    <ClInclude Include="Types\stop_program_response_t.hpp" />
     <ClInclude Include="Types\stop_ptz_control_request_t.hpp" />
     <ClInclude Include="Types\stop_ptz_control_response_t.hpp" />
     <ClInclude Include="Types\stream_uri_request_t.hpp" />
     <ClInclude Include="Types\stream_uri_response_t.hpp" />
     <ClInclude Include="udp_broadcaster.h" />
     <ClInclude Include="uri_constants.h" />
+    <ClInclude Include="utility_functions.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="camera_rt.cpp" />
     <ClCompile Include="channel_names.cpp" />
     <ClCompile Include="lcm_handler.cpp" />
+    <ClCompile Include="messages.cpp" />
+    <ClCompile Include="ptz_cgi_request_response_handler.cpp" />
     <ClCompile Include="sun_api_response_parser.cpp" />
     <ClCompile Include="udp_broadcaster.cpp" />
     <ClCompile Include="stdafx.cpp">

@@ -111,6 +111,30 @@
     <ClInclude Include="Types\preset_move_response_t.hpp">
       <Filter>RequestResponseTypes</Filter>
     </ClInclude>
+    <ClInclude Include="ptz_cgi_request_response_handler.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="utility_functions.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="messages.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Types\output_request_t.hpp">
+      <Filter>RequestResponseTypes</Filter>
+    </ClInclude>
+    <ClInclude Include="Types\start_program_request_t.hpp">
+      <Filter>RequestResponseTypes</Filter>
+    </ClInclude>
+    <ClInclude Include="Types\start_program_response_t.hpp">
+      <Filter>RequestResponseTypes</Filter>
+    </ClInclude>
+    <ClInclude Include="Types\stop_program_request_t.hpp">
+      <Filter>RequestResponseTypes</Filter>
+    </ClInclude>
+    <ClInclude Include="Types\stop_program_response_t.hpp">
+      <Filter>RequestResponseTypes</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -129,6 +153,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="udp_broadcaster.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ptz_cgi_request_response_handler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="messages.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

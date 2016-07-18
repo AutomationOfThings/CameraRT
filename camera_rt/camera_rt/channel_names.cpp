@@ -11,6 +11,9 @@ namespace ptz_camera_req_channels
 	const char* stop_ptz_control_req_channel = "STOPPTZCONTROLREQ";
 	const char* preset_config_req_channel = "PRESETCONFREQ";
 	const char* preset_move_req_channel = "PRESETMOVEREQ";
+	const char* start_program_req_channel = "STARTPROGRAMREQ";
+	const char* stop_program_req_channel = "STOPPROGRAMREQ";
+	const char* output_req_channel = "OUTPUTREQ";
  }
 
 namespace ptz_camera_res_channels
@@ -24,4 +27,6 @@ namespace ptz_camera_res_channels
 	const char* stop_ptz_control_res_channel = "STOPPTZCONTROLRES";
 	const char* preset_config_res_channel = "PRESETCONFRES";
 	const char* preset_move_res_channel = "PRESETMOVERES";
+	const char* start_program_res_channel = "STARTPROGRAMRES";
+	const char* stop_program_res_channel = "STOPPROGRAMRES";
 }

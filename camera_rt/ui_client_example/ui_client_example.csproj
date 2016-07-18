@@ -80,6 +80,13 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Events\OutputRequestReceivedEvent.cs" />
+    <Compile Include="Events\StartProgramResponseReceivedEvent.cs" />
+    <Compile Include="LCM_Types\output_request_t.cs" />
+    <Compile Include="LCM_Types\start_program_request_t.cs" />
+    <Compile Include="LCM_Types\start_program_response_t.cs" />
+    <Compile Include="LCM_Types\stop_program_request_t.cs" />
+    <Compile Include="LCM_Types\stop_program_response_t.cs" />
     <Compile Include="ResponseChannelNames.cs" />
     <Compile Include="RequestChannelNames.cs" />
     <Compile Include="Events\PresetMoveResponseReceivedEvent.cs" />
@@ -114,6 +121,8 @@
     <Compile Include="LCM_Types\ptz_control_request_t.cs" />
     <Compile Include="LCM_Types\stream_uri_request_t.cs" />
     <Compile Include="LCM_Types\stream_uri_response_t.cs" />
+    <Compile Include="Subscribers\OutputRequestHandler.cs" />
+    <Compile Include="Subscribers\StartProgramResponseHandler.cs" />
     <Compile Include="Subscribers\PresetMoveResponseHandler.cs" />
     <Compile Include="Subscribers\PresetConfigResponseHandler.cs" />
     <Compile Include="Subscribers\EndSessionResponseHandler.cs" />
@@ -123,6 +132,9 @@
     <Compile Include="Subscribers\PositionResponseHandler.cs" />
     <Compile Include="Subscribers\PtzControlResponseHandler.cs" />
     <Compile Include="Subscribers\StreamUriResponseHandler.cs" />
+    <Compile Include="WriteProgramDialog.xaml.cs">
+      <DependentUpon>WriteProgramDialog.xaml</DependentUpon>
+    </Compile>
     <Page Include="LoginDialog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -139,6 +151,10 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="WriteProgramDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs">

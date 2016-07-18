@@ -142,3 +142,29 @@ struct preset_move_response_t
 	int16_t status_code;
 	string response_message;
 }
+
+struct start_program_request_t
+{
+	string program;
+}
+
+struct start_program_response_t
+{
+	int16_t status_code;
+	string response_message;
+}
+
+struct stop_program_request_t
+{
+}
+
+struct stop_program_response_t
+{
+	int16_t status_code;
+	string response_message;
+}
+
+struct output_request_t
+{
+	string ip_address;
+}

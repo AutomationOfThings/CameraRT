@@ -17,5 +17,7 @@ namespace ui_client_example
         public const string stop_ptz_control_res_channel = "STOPPTZCONTROLRES";  
         public const string preset_config_res_channel = "PRESETCONFRES";   
         public const string preset_move_res_channel = "PRESETMOVERES";
-    }
+        public const string start_program_res_channel = "STARTPROGRAMRES";
+        public const string stop_program_res_channel = "STOPPROGRAMRES";
+    }   
 }

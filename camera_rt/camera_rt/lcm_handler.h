@@ -10,6 +10,9 @@
 #include "Types\stop_ptz_control_request_t.hpp"
 #include "Types\preset_config_request_t.hpp"
 #include "Types\preset_move_request_t.hpp"
+#include "Types\start_program_request_t.hpp"
+#include "Types\stop_program_request_t.hpp"
+#include "Types\position_response_t.hpp"
 
 #include <cpprest\http_client.h>
 #include <cpprest\filestream.h>
@@ -30,7 +33,7 @@ class lcm_handler
 public:	
 	lcm_handler(lcm::LCM* lcm) 
 	{ 
-		this->lcm = lcm;
+		this->lcm = lcm;		
 	}
 
 	~lcm_handler() {}
@@ -66,19 +69,35 @@ public:
 		const std::string& channel,
 		const ptz_camera::position_request_t* req);
 
-	void lcm_handler::on_preset_config_request(const lcm::ReceiveBuffer* rbuf,
+	void on_preset_config_request(const lcm::ReceiveBuffer* rbuf,
 		const std::string& channel,
 		const ptz_camera::preset_config_request_t* req);
 
-	void lcm_handler::on_preset_move_request(const lcm::ReceiveBuffer* rbuf,
+	void on_preset_move_request(const lcm::ReceiveBuffer* rbuf,
 		const std::string& channel,
 		const ptz_camera::preset_move_request_t* req);
 
+	void on_start_program_request(const lcm::ReceiveBuffer* rbuf,
+		const std::string& channel,
+		const ptz_camera::start_program_request_t* req);
+
+	void on_stop_program_request(const lcm::ReceiveBuffer* rbuf,
+		const std::string& channel,
+		const ptz_camera::stop_program_request_t* req);	
+
+
 private:
 	lcm::LCM* lcm;
+	cancellation_token_source program_cts;
+	bool program_is_executing;
+
 	std::unordered_map <std::string, http_client*> ip_client_map;
 
-	void lcm_handler::send_ptz_control_request(ptz_camera::ptz_control_request_t req);
+	void lcm_handler::send_ptz_control_request
+		(ptz_camera::ptz_control_request_t req);
+
+	pplx::task<ptz_camera::position_response_t> get_camera_position
+		(http_client* client);
 
 	std::string const ok_message = "OK\n";
 
@@ -96,7 +115,17 @@ private:
 		return std::string(value.begin(), value.end());
 	}
 
+	void handle_wait_in_program(std::string value);
 
+	void handle_preset_in_program(std::string value);
+
+	void handle_output_in_program(std::string value);
+
+	void handle_unrecognized_key_in_program(std::string value);
+
+	std::queue<std::pair <std::string, std::string> > parse_program(std::string program_text);
+
+	pplx::task<void> execute_program(std::queue<std::pair <std::string, std::string> > program);
 
 };
 
