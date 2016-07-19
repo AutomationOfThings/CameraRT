@@ -146,6 +146,12 @@ struct preset_move_response_t
 struct start_program_request_t
 {
 	string program;
+	// SAMPLE
+	//WAIT=3000
+	//OUTPUT=192.168.1.206
+	//PRESET=192.168.1.206,100,50,1
+	//WAIT=2000
+	//OUTPUT=192.168.1.211
 }
 
 struct start_program_response_t

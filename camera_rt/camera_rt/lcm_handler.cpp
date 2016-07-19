@@ -17,6 +17,7 @@
 #include "Types\output_request_t.hpp"
 #include "Types\status_codes_t.hpp"
 #include "messages.h"
+#include "exceptions.h"
 #include <ppltasks.h>
 #include <chrono>
 #include <thread>
@@ -818,18 +819,17 @@ void lcm_handler::on_start_program_request(const lcm::ReceiveBuffer* rbuf,
 		 << std::endl;
 
 	auto start_program_response = make_shared<ptz_camera::start_program_response_t>();
+	auto program_pairs = make_shared<std::queue<std::pair <std::string, std::string> > > ();
+	auto program = make_shared<std::string>();
 
-	string program = req->program;
+	*program.get() = req->program;
 
-	program_task = create_task([start_program_response, program, this]()
+	create_task([start_program_response, program, program_pairs, this]()
 	{
-		std::cout << "Parsing program... \n";
-		std::queue<std::pair <std::string, std::string> > program_pairs;
-
 		try
 		{
-			program_pairs = this->parse_program(program);
-
+			*program_pairs = this->parse_program(*(program.get()));
+			std:cout << lcm_handler::ok_message;
 			start_program_response->status_code = ptz_camera::status_codes_t::OK;
 			start_program_response->response_message = "OK";
 			this->lcm->publish(ptz_camera_res_channels::start_program_res_channel, start_program_response.get());
@@ -838,18 +838,21 @@ void lcm_handler::on_start_program_request(const lcm::ReceiveBuffer* rbuf,
 		catch (const exception& e)
 		{
 			start_program_response->status_code = ptz_camera::status_codes_t::ERR;
-			start_program_response->response_message = "Erro parsing program";
+			start_program_response->response_message = "Error parsing program";
 			this->lcm->publish(ptz_camera_res_channels::start_program_res_channel, start_program_response.get());
 			return;
 		}
 
 		try
 		{
-			this->program_task = this->execute_program(program_pairs);
+			this->program_is_executing = true;
+			this->execute_program(program_pairs.get()).wait();
+			this->program_is_executing = false;
 		}
 
 		catch (const exception& e)
 		{
+			this->program_is_executing = false;
 			start_program_response->status_code = ptz_camera::status_codes_t::ERR;
 			start_program_response->response_message = "Error executing program";
 			this->lcm->publish(ptz_camera_res_channels::start_program_res_channel, start_program_response.get());
@@ -866,6 +869,8 @@ void lcm_handler::on_start_program_request(const lcm::ReceiveBuffer* rbuf,
 std::queue<std::pair <std::string, std::string> > 
 lcm_handler::parse_program(std::string program_text)
 {
+	std::cout << "Parsing program... \n";
+
 	std::queue<std::pair <std::string, std::string> > program_pairs;
 	std::istringstream is_program(program_text);
 
@@ -899,17 +904,17 @@ lcm_handler::parse_program(std::string program_text)
 	return program_pairs;
 }
 
-pplx::task<void> lcm_handler::execute_program(std::queue<std::pair <std::string, std::string> > program)
+pplx::task<void> lcm_handler::execute_program(std::queue<std::pair <std::string, std::string> >* program)
 {
-	auto program_task = create_task([this, &program]()
+	auto program_task = create_task([this, program]()
 	{
-		while (program.size() > 0)
+		while ((*program).size() > 0)
 		{
 			if (this->program_cts.get_token().is_canceled())
 				cancel_current_task();
 
-			auto current_pair = program.front();
-			program.pop();
+			auto current_pair = (*program).front();
+			(*program).pop();
 
 			if (current_pair.first == "WAIT")
 				this->handle_wait_in_program(current_pair.second);
@@ -936,7 +941,7 @@ void lcm_handler::handle_wait_in_program(string value)
 
 	catch (const exception& e)
 	{
-
+		throw program_execution_exception("Error executing wait in program: value was" + value);
 	}
 }
 
@@ -954,6 +959,10 @@ void lcm_handler::handle_preset_in_program(string preset_value)
 	{
 		preset_vector.push_back(value);		
 	}
+
+	if (preset_vector.size() != 4)
+		throw program_execution_exception("Error executing \
+			preset in program: value was" + value);
 
 	ptz_camera::ptz_control_request_t ptz_control_request;
 
@@ -987,6 +996,20 @@ void lcm_handler::on_stop_program_request(const lcm::ReceiveBuffer* rbuf,
 	const std::string& channel,
 	const ptz_camera::stop_program_request_t* req)
 {
-	if (program_task.)
-	this->program_cts.cancel();
+	ptz_camera::stop_program_response_t stop_program_response;
+
+	if (this->program_is_executing)
+	{
+		this->program_cts.cancel();
+		stop_program_response.status_code = ptz_camera::status_codes_t::OK;
+		stop_program_response.response_message = "OK";		
+	}
+
+	else
+	{
+		stop_program_response.status_code = ptz_camera::status_codes_t::ERR;
+		stop_program_response.response_message = "No running program";
+	}
+
+	this->lcm->publish(ptz_camera_res_channels::stop_program_res_channel, &stop_program_response);
 }

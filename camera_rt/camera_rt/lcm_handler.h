@@ -88,8 +88,8 @@ public:
 
 private:
 	lcm::LCM* lcm;
-	cancellation_token_source program_cts;
-	bool program_is_executing;
+	Concurrency::cancellation_token_source program_cts;
+	bool program_is_executing;	
 
 	std::unordered_map <std::string, http_client*> ip_client_map;
 
@@ -125,8 +125,7 @@ private:
 
 	std::queue<std::pair <std::string, std::string> > parse_program(std::string program_text);
 
-	pplx::task<void> execute_program(std::queue<std::pair <std::string, std::string> > program);
-
+	pplx::task<void> execute_program(std::queue<std::pair <std::string, std::string> >* program);
 };
 
 	
