@@ -819,9 +819,8 @@ void lcm_handler::on_start_program_request(const lcm::ReceiveBuffer* rbuf,
 		 << std::endl;
 
 	auto start_program_response = make_shared<ptz_camera::start_program_response_t>();
-
-	// Will not process another program request until the previous one is finished
-	/*if (this->program_is_executing)
+	
+	if (this->program_is_executing)
 	{
 		start_program_response->status_code = ptz_camera::status_codes_t::ERR;
 		auto error_message = "A program is already running, request dropped!";
@@ -830,7 +829,12 @@ void lcm_handler::on_start_program_request(const lcm::ReceiveBuffer* rbuf,
 		start_program_response->response_message = error_message;
 		this->lcm->publish(ptz_camera_res_channels::start_program_res_channel, start_program_response.get());
 		return;
-	}*/
+	}
+
+
+	// Reset cts
+	auto cts = std::make_shared<cancellation_token_source>();
+	this->program_cts = *cts;
 
 	auto program_pairs = make_shared<std::queue<std::pair <std::string, std::vector<std::string>> > > ();
 	auto program = make_shared<std::string>();
@@ -891,9 +895,7 @@ void lcm_handler::on_start_program_request(const lcm::ReceiveBuffer* rbuf,
 		this->lcm->publish(
 			ptz_camera_req_channels::output_req_channel, &program_end_request);
 		std::cout << lcm_handler::ok_message;
-	}, this->program_cts.get_token());
-
-	program_task.wait();
+	});	
 }
 
 std::queue<std::pair <std::string, std::vector<string>> > 
@@ -980,13 +982,13 @@ pplx::task<void> lcm_handler::execute_program(std::queue<std::pair <std::string,
 			(*program).pop();
 
 			if (current_pair.first == "WAIT")
-				this->handle_wait_in_program(current_pair.second[0]);
+				this->handle_wait_in_program(&(current_pair.second[0])).wait();
 
 			if (current_pair.first == "PRESET")
-				this->handle_preset_in_program(current_pair.second);
+				this->handle_preset_in_program(&current_pair.second).wait();
 
 			if (current_pair.first == "OUTPUT")
-				this->handle_output_in_program(current_pair.second[0]);
+				this->handle_output_in_program(&current_pair.second[0]);
 		}
 	}, this->program_cts.get_token());
 
@@ -994,58 +996,66 @@ pplx::task<void> lcm_handler::execute_program(std::queue<std::pair <std::string,
 }
 
 
-void lcm_handler::handle_wait_in_program(std::string wait_value)
+task<void> lcm_handler::handle_wait_in_program(std::string* wait_value)
 {
-	std::cout << "Waiting for: " << wait_value << std::endl;
-	try 
+	return create_task([wait_value]()
 	{
-		std::this_thread::sleep_for(std::chrono::milliseconds(atoi(wait_value.c_str())));
-	}
+		std::cout << "Waiting for: " << *wait_value << std::endl;
+		try
+		{
+			std::this_thread::sleep_for(std::chrono::
+				milliseconds(atoi((*wait_value).c_str())));
+		}
 
-	catch (const exception& e)
-	{
-		throw program_execution_exception("Error executing wait in program: value was" + wait_value);
-	}
+		catch (const exception& e)
+		{
+			throw program_execution_exception(
+				"Error executing wait in program: value was" + *wait_value);
+		}
+	}, this->program_cts.get_token());
 }
 
-void lcm_handler::handle_preset_in_program(std::vector<std::string> preset_value)
+task<void> lcm_handler::handle_preset_in_program(std::vector<std::string>* preset_value)
 {
-	string message = "Executing preset for camera: " + preset_value[0] + 
-		" pan: " + preset_value[1]	+ " tilt: " + preset_value[2] +
-		" zoom: "  + preset_value[3] + "\n";
-	std::cout << message;	
+	return create_task([preset_value, this]()
+	{
+		string message = "Executing preset for camera: " + (*preset_value)[0] +
+			" pan: " + (*preset_value)[1] + " tilt: " + (*preset_value)[2] +
+			" zoom: " + (*preset_value)[3] + "\n";
+		std::cout << message;
 
 
-	auto ip_client_pair = this->ip_client_map.find(preset_value[0]);
-	if (ip_client_pair == ip_client_map.end())
-		throw program_execution_exception("Cannot execute preset. " 
-			"No session initialized for ip: " + preset_value[0]);
+		auto ip_client_pair = this->ip_client_map.find((*preset_value)[0]);
+		if (ip_client_pair == ip_client_map.end())
+			throw program_execution_exception("Cannot execute preset. "
+				"No session initialized for ip: " + (*preset_value)[0]);
 
-	ptz_camera::ptz_control_request_t ptz_control_request;
+		ptz_camera::ptz_control_request_t ptz_control_request;
 
-	ptz_control_request.mode = ptz_camera::ptz_control_request_t::ABS;
-	ptz_control_request.ip_address = preset_value[0];
-	ptz_control_request.pan_value = preset_value[1];
-	ptz_control_request.tilt_value = preset_value[2];
-	ptz_control_request.zoom_value = preset_value[3];
+		ptz_control_request.mode = ptz_camera::ptz_control_request_t::ABS;
+		ptz_control_request.ip_address = (*preset_value)[0];
+		ptz_control_request.pan_value = (*preset_value)[1];
+		ptz_control_request.tilt_value = (*preset_value)[2];
+		ptz_control_request.zoom_value = (*preset_value)[3];
 
-	send_ptz_control_request(ptz_control_request);	
+		send_ptz_control_request(ptz_control_request);
+	}, this->program_cts.get_token());
 }
 
-void lcm_handler::handle_output_in_program(string value)
+void lcm_handler::handle_output_in_program(string* value)
 {
-	std::cout << "Switching output to camera: " << value << std::endl;
+	std::cout << "Switching output to camera: " << *value << std::endl;
 
 	auto output_request = make_shared<ptz_camera::output_request_t>();
 
-	output_request->ip_address = value;
+	output_request->ip_address = *value;
 
 	lcm->publish(ptz_camera_req_channels::output_req_channel, output_request.get());
 }
 
-void lcm_handler::handle_unrecognized_key_in_program(string value)
+void lcm_handler::handle_unrecognized_key_in_program(string* value)
 {
-	std::cout << "Unrecognized key in program: " << value << std::endl;
+	std::cout << "Unrecognized key in program: " << *value << std::endl;
 }
 
 
@@ -1061,7 +1071,7 @@ void lcm_handler::on_stop_program_request(const lcm::ReceiveBuffer* rbuf,
 	if (this->program_is_executing)
 	{
 		std::cout << "Stopping running program... ";
-		this->program_cts.cancel();
+		this->program_cts.cancel();		
 		std::cout << lcm_handler::ok_message;
 		stop_program_response.status_code = ptz_camera::status_codes_t::OK;
 		stop_program_response.response_message = "OK";		
@@ -1070,7 +1080,8 @@ void lcm_handler::on_stop_program_request(const lcm::ReceiveBuffer* rbuf,
 	else
 	{
 		stop_program_response.status_code = ptz_camera::status_codes_t::ERR;
-		stop_program_response.response_message = "No running program to stop\n";
+		auto error_message = "No running program to stop\n";
+		stop_program_response.response_message = error_message;
 	}
 
 	this->lcm->publish(ptz_camera_res_channels::stop_program_res_channel, &stop_program_response);

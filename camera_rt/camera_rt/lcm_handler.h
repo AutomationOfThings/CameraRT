@@ -115,13 +115,13 @@ private:
 		return std::string(value.begin(), value.end());
 	}
 
-	void handle_wait_in_program(std::string value);
+	pplx::task<void> handle_wait_in_program(std::string* value);
 
-	void handle_preset_in_program(std::vector<std::string> value);
+	pplx::task<void> handle_preset_in_program(std::vector<std::string>* value);
 
-	void handle_output_in_program(std::string value);
+	void handle_output_in_program(std::string* value);
 
-	void handle_unrecognized_key_in_program(std::string value);
+	void handle_unrecognized_key_in_program(std::string* value);
 
 	std::queue<std::pair <std::string, std::vector<std::string> > > parse_program(std::string program_text);
 
