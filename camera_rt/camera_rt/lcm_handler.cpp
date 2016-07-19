@@ -374,7 +374,7 @@ void lcm_handler::send_ptz_control_request(ptz_camera::ptz_control_request_t req
 				return response.extract_string();
 			}
 
-			catch (const exception& e)
+			catch (const http_exception& e)
 			{
 				cout << "Caught exception: " << e.what() << endl;
 				return create_task([e, this]() -> wstring
@@ -819,12 +819,25 @@ void lcm_handler::on_start_program_request(const lcm::ReceiveBuffer* rbuf,
 		 << std::endl;
 
 	auto start_program_response = make_shared<ptz_camera::start_program_response_t>();
+
+	// Will not process another program request until the previous one is finished
+	/*if (this->program_is_executing)
+	{
+		start_program_response->status_code = ptz_camera::status_codes_t::ERR;
+		auto error_message = "A program is already running, request dropped!";
+		std::cout << error_message << std::endl;
+
+		start_program_response->response_message = error_message;
+		this->lcm->publish(ptz_camera_res_channels::start_program_res_channel, start_program_response.get());
+		return;
+	}*/
+
 	auto program_pairs = make_shared<std::queue<std::pair <std::string, std::vector<std::string>> > > ();
 	auto program = make_shared<std::string>();
 
 	*program.get() = req->program;
 
-	create_task([start_program_response, program, program_pairs, this]()
+	auto program_task = create_task([start_program_response, program, program_pairs, this]()
 	{
 		try
 		{
@@ -870,9 +883,7 @@ void lcm_handler::on_start_program_request(const lcm::ReceiveBuffer* rbuf,
 			start_program_response->response_message = e.what();
 			this->lcm->publish(ptz_camera_res_channels::start_program_res_channel, start_program_response.get());
 			return;
-		}
-
-		
+		}		
 
 		std::cout << "Sending program end notification...";
 		ptz_camera::output_request_t program_end_request;
@@ -881,6 +892,8 @@ void lcm_handler::on_start_program_request(const lcm::ReceiveBuffer* rbuf,
 			ptz_camera_req_channels::output_req_channel, &program_end_request);
 		std::cout << lcm_handler::ok_message;
 	}, this->program_cts.get_token());
+
+	program_task.wait();
 }
 
 std::queue<std::pair <std::string, std::vector<string>> > 
@@ -1041,13 +1054,13 @@ void lcm_handler::on_stop_program_request(const lcm::ReceiveBuffer* rbuf,
 	const ptz_camera::stop_program_request_t* req)
 {
 	std::cout << "Received stop_program request on channel: " << channel
-		<< std::endl;
+		<< std::endl;	
 
 	ptz_camera::stop_program_response_t stop_program_response;
-
+	
 	if (this->program_is_executing)
 	{
-		std::cout << "Stopping running program... \n";
+		std::cout << "Stopping running program... ";
 		this->program_cts.cancel();
 		std::cout << lcm_handler::ok_message;
 		stop_program_response.status_code = ptz_camera::status_codes_t::OK;

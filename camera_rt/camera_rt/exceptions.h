@@ -17,3 +17,9 @@ public:
 		: std::runtime_error(what) {}
 };
 
+class camera_request_exception : public std::runtime_error
+{
+public:
+	camera_request_exception(const std::string &what) : 
+		std::runtime_error(what) {}
+};
