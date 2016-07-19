@@ -120,13 +120,20 @@
         <StackPanel Grid.Row="7" Orientation="Horizontal" Margin="14,0">
             <Button Content="Write Program" Width ="100" Height="40" Command="{Binding WriteProgramCommand}"/>
             <ScrollViewer VerticalScrollBarVisibility="Visible" Margin="10">
-                <TextBlock Width="80" Text="{Binding StartProgramResponse, Mode=TwoWay}"                       
+                <TextBlock Width="40" Text="{Binding StartProgramResponse, Mode=TwoWay}"                       
                        TextWrapping="Wrap" HorizontalAlignment="Stretch"
                        ScrollViewer.VerticalScrollBarVisibility="Visible"
                        ScrollViewer.CanContentScroll="True" />
             </ScrollViewer>
             <ScrollViewer VerticalScrollBarVisibility="Visible" Margin="10">
                 <TextBlock Width="80" Text="{Binding OutputRequest, Mode=TwoWay}"                       
+                       TextWrapping="Wrap" HorizontalAlignment="Stretch"
+                       ScrollViewer.VerticalScrollBarVisibility="Visible"
+                       ScrollViewer.CanContentScroll="True" />
+            </ScrollViewer>
+            <Button Content="Stop Program" Width ="100" Height="40" Command="{Binding StopProgramCommand}"/>
+            <ScrollViewer VerticalScrollBarVisibility="Visible" Margin="10">
+                <TextBlock Width="40" Text="{Binding StopProgramResponse, Mode=TwoWay}"                       
                        TextWrapping="Wrap" HorizontalAlignment="Stretch"
                        ScrollViewer.VerticalScrollBarVisibility="Visible"
                        ScrollViewer.CanContentScroll="True" />

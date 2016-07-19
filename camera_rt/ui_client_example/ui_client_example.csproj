@@ -81,6 +81,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Events\OutputRequestReceivedEvent.cs" />
+    <Compile Include="Events\StopProgramResponseReceivedEvent.cs" />
     <Compile Include="Events\StartProgramResponseReceivedEvent.cs" />
     <Compile Include="LCM_Types\output_request_t.cs" />
     <Compile Include="LCM_Types\start_program_request_t.cs" />
@@ -122,6 +123,7 @@
     <Compile Include="LCM_Types\stream_uri_request_t.cs" />
     <Compile Include="LCM_Types\stream_uri_response_t.cs" />
     <Compile Include="Subscribers\OutputRequestHandler.cs" />
+    <Compile Include="Subscribers\StopProgramResponseHandler.cs" />
     <Compile Include="Subscribers\StartProgramResponseHandler.cs" />
     <Compile Include="Subscribers\PresetMoveResponseHandler.cs" />
     <Compile Include="Subscribers\PresetConfigResponseHandler.cs" />

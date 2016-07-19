@@ -35,6 +35,7 @@ namespace ui_client_example
         public ICommand PresetMoveCommand { get; set; }
         public ICommand WriteProgramCommand { get; set; }
         public ICommand StartProgramCommand { get; set; }
+        public ICommand StopProgramCommand { get; set; }
 
         public string CurrentPanValue { get; set; }
         public string CurrentTiltValue { get; set; }
@@ -58,6 +59,7 @@ namespace ui_client_example
         public string PtzControlResponse { get; set; }
 
         public string StartProgramResponse { get; set; }
+        public string StopProgramResponse { get; set; }
         public string OutputRequest { get; set; }
 
         public string PresetName { get; set; }
@@ -97,6 +99,7 @@ namespace ui_client_example
             PresetMoveCommand = new DelegateCommand(OnPresetMoveCommand);
             WriteProgramCommand = new DelegateCommand(OnWriteProgramCommand);
             StartProgramCommand = new DelegateCommand(OnStartProgramCommand);
+            StopProgramCommand = new DelegateCommand(OnStopProgramCommand);
 
             dynamic app = ui_client_example.App.Current;
             var ea = (EventAggregator)app.EA;
@@ -111,6 +114,16 @@ namespace ui_client_example
             ea.GetEvent<PresetMoveResponseReceivedEvent>().Subscribe(OnPresetMoveResponseReceived);
             ea.GetEvent<StartProgramResponseReceivedEvent>().Subscribe(OnStartProgramResponseReceived);
             ea.GetEvent<OutputRequestReceivedEvent>().Subscribe(OnOutputRequestReceived);
+            ea.GetEvent<StopProgramResponseReceivedEvent>().Subscribe(OnStopProgramResponseReceived);
+        }
+
+        private void OnStopProgramResponseReceived(stop_program_response_t stop_program_response)
+        {
+            StopProgramResponse = stop_program_response.response_message;
+            OnPropertyChanged("StopProgramResponse");
+
+            if (stop_program_response.status_code == status_codes_t.ERR)
+                MessageBox.Show(StopProgramResponse);
         }
 
         private void OnStartProgramCommand()
@@ -122,6 +135,12 @@ namespace ui_client_example
 
             _writeProgramDialog.Close();
             _lcm.Publish(RequestChannelNames.start_program_req_channel, start_program_request);
+        }
+
+        private void OnStopProgramCommand()
+        {
+            var stop_program_request = new stop_program_request_t();
+            _lcm.Publish(RequestChannelNames.stop_program_req_channel, stop_program_request);
         }
 
         private void OnWriteProgramCommand()
@@ -143,7 +162,7 @@ namespace ui_client_example
             OnPropertyChanged("StartProgramResponse");
 
             if (start_program_response.status_code == status_codes_t.ERR)
-                MessageBox.Show(PresetMoveResponse);
+                MessageBox.Show(StartProgramResponse);
         }
 
         private void SubscribeForResponses()
@@ -165,6 +184,7 @@ namespace ui_client_example
 
             _lcm.Subscribe(ResponseChannelNames.start_program_res_channel, new StartProgramResponseHandler());
             _lcm.Subscribe(RequestChannelNames.output_req_channel, new OutputRequestHandler());
+            _lcm.Subscribe(ResponseChannelNames.stop_program_res_channel, new StopProgramResponseHandler());
         }
 
         private void OnPresetSetCommand()
