@@ -60,6 +60,9 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	lcm.subscribe(ptz_camera_req_channels::start_program_req_channel,
 		&lcm_handler::on_start_program_request, &handler);
+
+	lcm.subscribe(ptz_camera_req_channels::stop_program_req_channel,
+		&lcm_handler::on_stop_program_request, &handler);
 	
 	std::cout << "OK\n";
 

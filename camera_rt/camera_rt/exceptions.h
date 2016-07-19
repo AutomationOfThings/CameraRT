@@ -16,3 +16,4 @@ public:
 	program_parse_exception(const std::string &what)
 		: std::runtime_error(what) {}
 };
+

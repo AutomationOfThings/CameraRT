@@ -117,15 +117,15 @@ private:
 
 	void handle_wait_in_program(std::string value);
 
-	void handle_preset_in_program(std::string value);
+	void handle_preset_in_program(std::vector<std::string> value);
 
 	void handle_output_in_program(std::string value);
 
 	void handle_unrecognized_key_in_program(std::string value);
 
-	std::queue<std::pair <std::string, std::string> > parse_program(std::string program_text);
+	std::queue<std::pair <std::string, std::vector<std::string> > > parse_program(std::string program_text);
 
-	pplx::task<void> execute_program(std::queue<std::pair <std::string, std::string> >* program);
+	pplx::task<void> execute_program(std::queue<std::pair <std::string, std::vector<std::string> > >* program);
 };
 
 	

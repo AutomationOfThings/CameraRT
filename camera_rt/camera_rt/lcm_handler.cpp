@@ -819,7 +819,7 @@ void lcm_handler::on_start_program_request(const lcm::ReceiveBuffer* rbuf,
 		 << std::endl;
 
 	auto start_program_response = make_shared<ptz_camera::start_program_response_t>();
-	auto program_pairs = make_shared<std::queue<std::pair <std::string, std::string> > > ();
+	auto program_pairs = make_shared<std::queue<std::pair <std::string, std::vector<std::string>> > > ();
 	auto program = make_shared<std::string>();
 
 	*program.get() = req->program;
@@ -828,6 +828,7 @@ void lcm_handler::on_start_program_request(const lcm::ReceiveBuffer* rbuf,
 	{
 		try
 		{
+			std::cout << "Parsing program... ";
 			*program_pairs = this->parse_program(*(program.get()));
 			std:cout << lcm_handler::ok_message;
 			start_program_response->status_code = ptz_camera::status_codes_t::OK;
@@ -835,76 +836,125 @@ void lcm_handler::on_start_program_request(const lcm::ReceiveBuffer* rbuf,
 			this->lcm->publish(ptz_camera_res_channels::start_program_res_channel, start_program_response.get());
 		}
 		
-		catch (const exception& e)
+		catch (const program_parse_exception& e)
 		{
+			std::cout << e.what() << std::endl;
 			start_program_response->status_code = ptz_camera::status_codes_t::ERR;
-			start_program_response->response_message = "Error parsing program";
+			start_program_response->response_message = e.what();
+			this->lcm->publish(ptz_camera_res_channels::start_program_res_channel, start_program_response.get());
+			return;
+		}
+
+		catch (const logic_error& e)
+		{
+			std::cout << e.what() << std::endl;
+			start_program_response->status_code = ptz_camera::status_codes_t::ERR;
+			start_program_response->response_message = e.what();
 			this->lcm->publish(ptz_camera_res_channels::start_program_res_channel, start_program_response.get());
 			return;
 		}
 
 		try
 		{
+			std::cout << "Executing program... \n";
 			this->program_is_executing = true;
-			this->execute_program(program_pairs.get()).wait();
+			this->execute_program(program_pairs.get()).wait();			
 			this->program_is_executing = false;
 		}
 
-		catch (const exception& e)
+		catch (const program_execution_exception& e)
 		{
+			std::cout << e.what() << std::endl;
 			this->program_is_executing = false;
 			start_program_response->status_code = ptz_camera::status_codes_t::ERR;
-			start_program_response->response_message = "Error executing program";
+			start_program_response->response_message = e.what();
 			this->lcm->publish(ptz_camera_res_channels::start_program_res_channel, start_program_response.get());
 			return;
 		}
 
-		std::cout << "Sending program end notification... \n";
+		
+
+		std::cout << "Sending program end notification...";
 		ptz_camera::output_request_t program_end_request;
 		program_end_request.ip_address = "";
-		this->lcm->publish(ptz_camera_req_channels::output_req_channel, &program_end_request);
+		this->lcm->publish(
+			ptz_camera_req_channels::output_req_channel, &program_end_request);
+		std::cout << lcm_handler::ok_message;
 	}, this->program_cts.get_token());
 }
 
-std::queue<std::pair <std::string, std::string> > 
+std::queue<std::pair <std::string, std::vector<string>> > 
 lcm_handler::parse_program(std::string program_text)
 {
-	std::cout << "Parsing program... \n";
-
-	std::queue<std::pair <std::string, std::string> > program_pairs;
+	std::queue<std::pair <std::string, std::vector<std::string>> > program_pairs;
 	std::istringstream is_program(program_text);
 
-	std::string line;	
+	std::string line;
+	int line_num = 1;
+
 	while (std::getline(is_program, line))
 	{
 		std::istringstream is_line(line);
 		std::string key;
 		if (std::getline(is_line, key, '='))
 		{
+			if ((key != "WAIT") && (key != "OUTPUT") && (key != "PRESET"))
+				throw program_parse_exception(
+					"Unrecognized token in program: \"" + key + "\" Line:" + std::to_string(line_num));
+
 			std::string value;
 			if (std::getline(is_line, value))
 			{
 				if (key == "WAIT")
-					program_pairs.push(std::pair<std::string, std::string>("WAIT", value));				
+				{
+					std::vector<std::string> value_vector;
+					value_vector.push_back(value);
+					program_pairs.push(std::pair<std::string, std::vector<std::string> >("WAIT", value_vector));
+				}
 
 				else if (key == "OUTPUT")
-					program_pairs.push(std::pair<std::string, std::string>("OUTPUT", value));
+				{
+					std::vector<std::string> value_vector;
+					value_vector.push_back(value);
+					program_pairs.push(std::pair<std::string, std::vector<std::string> >("OUTPUT", value_vector));
+				}
 
 				else if (key == "PRESET")
-					program_pairs.push(std::pair<std::string, std::string>("PRESET", value));
-
-				else
 				{
-					throw;
+					std::vector<string> preset_vector;
+					std::stringstream preset_stream(value);
+					string value;
+
+					while (getline(preset_stream, value, ','))
+					{
+						preset_vector.push_back(value);
+					}
+
+					if (preset_vector.size() != 4)
+						throw program_parse_exception("Error parsing "
+							"preset token in program: value was " + value + " Line: " + std::to_string(line_num));
+
+					program_pairs.push(std::pair<std::string, std::vector<std::string> >("PRESET", preset_vector));
 				}
 			}
+
+			else				
+				throw program_parse_exception(
+					"Missing token after: \"" + key + "\" Line: " + std::to_string(line_num));
 		}
+
+		else			
+			throw program_parse_exception(
+				"Unable to locate token '='. Line: " + std::to_string(line_num));
+
+		line_num += 1;
+		
 	}
 
 	return program_pairs;
 }
 
-pplx::task<void> lcm_handler::execute_program(std::queue<std::pair <std::string, std::string> >* program)
+pplx::task<void> lcm_handler::execute_program(std::queue<std::pair <std::string, std::vector<std::string> > >* program)
 {
 	auto program_task = create_task([this, program]()
 	{
@@ -917,13 +967,13 @@ pplx::task<void> lcm_handler::execute_program(std::queue<std::pair <std::string,
 			(*program).pop();
 
 			if (current_pair.first == "WAIT")
-				this->handle_wait_in_program(current_pair.second);
+				this->handle_wait_in_program(current_pair.second[0]);
 
 			if (current_pair.first == "PRESET")
 				this->handle_preset_in_program(current_pair.second);
 
 			if (current_pair.first == "OUTPUT")
-				this->handle_output_in_program(current_pair.second);
+				this->handle_output_in_program(current_pair.second[0]);
 		}
 	}, this->program_cts.get_token());
 
@@ -931,46 +981,40 @@ pplx::task<void> lcm_handler::execute_program(std::queue<std::pair <std::string,
 }
 
 
-void lcm_handler::handle_wait_in_program(string value)
+void lcm_handler::handle_wait_in_program(std::string wait_value)
 {
-	std::cout << "Waiting for: " << value << std::endl;
+	std::cout << "Waiting for: " << wait_value << std::endl;
 	try 
 	{
-		std::this_thread::sleep_for(std::chrono::milliseconds(atoi(value.c_str())));
+		std::this_thread::sleep_for(std::chrono::milliseconds(atoi(wait_value.c_str())));
 	}
 
 	catch (const exception& e)
 	{
-		throw program_execution_exception("Error executing wait in program: value was" + value);
+		throw program_execution_exception("Error executing wait in program: value was" + wait_value);
 	}
 }
 
-void lcm_handler::handle_preset_in_program(string preset_value)
+void lcm_handler::handle_preset_in_program(std::vector<std::string> preset_value)
 {
-	std::cout << "Executing preset: " << preset_value << std::endl;
+	string message = "Executing preset for camera: " + preset_value[0] + 
+		" pan: " + preset_value[1]	+ " tilt: " + preset_value[2] +
+		" zoom: "  + preset_value[3] + "\n";
+	std::cout << message;	
 
-	std::vector<string> preset_vector;
 
-	std::stringstream preset_stream(preset_value);
-
-	string value;
-
-	while (getline(preset_stream, value, ','))
-	{
-		preset_vector.push_back(value);		
-	}
-
-	if (preset_vector.size() != 4)
-		throw program_execution_exception("Error executing \
-			preset in program: value was" + value);
+	auto ip_client_pair = this->ip_client_map.find(preset_value[0]);
+	if (ip_client_pair == ip_client_map.end())
+		throw program_execution_exception("Cannot execute preset. " 
+			"No session initialized for ip: " + preset_value[0]);
 
 	ptz_camera::ptz_control_request_t ptz_control_request;
 
 	ptz_control_request.mode = ptz_camera::ptz_control_request_t::ABS;
-	ptz_control_request.ip_address = preset_vector[0];
-	ptz_control_request.pan_value = preset_vector[1];
-	ptz_control_request.tilt_value = preset_vector[2];
-	ptz_control_request.zoom_value = preset_vector[3];
+	ptz_control_request.ip_address = preset_value[0];
+	ptz_control_request.pan_value = preset_value[1];
+	ptz_control_request.tilt_value = preset_value[2];
+	ptz_control_request.zoom_value = preset_value[3];
 
 	send_ptz_control_request(ptz_control_request);	
 }
@@ -996,11 +1040,16 @@ void lcm_handler::on_stop_program_request(const lcm::ReceiveBuffer* rbuf,
 	const std::string& channel,
 	const ptz_camera::stop_program_request_t* req)
 {
+	std::cout << "Received stop_program request on channel: " << channel
+		<< std::endl;
+
 	ptz_camera::stop_program_response_t stop_program_response;
 
 	if (this->program_is_executing)
 	{
+		std::cout << "Stopping running program... \n";
 		this->program_cts.cancel();
+		std::cout << lcm_handler::ok_message;
 		stop_program_response.status_code = ptz_camera::status_codes_t::OK;
 		stop_program_response.response_message = "OK";		
 	}
@@ -1008,7 +1057,7 @@ void lcm_handler::on_stop_program_request(const lcm::ReceiveBuffer* rbuf,
 	else
 	{
 		stop_program_response.status_code = ptz_camera::status_codes_t::ERR;
-		stop_program_response.response_message = "No running program";
+		stop_program_response.response_message = "No running program to stop\n";
 	}
 
 	this->lcm->publish(ptz_camera_res_channels::stop_program_res_channel, &stop_program_response);
