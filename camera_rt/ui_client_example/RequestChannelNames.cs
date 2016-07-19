@@ -16,6 +16,9 @@ namespace ui_client_example
         public const string position_req_channel = "POSITIONREQ";
         public const string stop_ptz_control_req_channel = "STOPPTZCONTROLREQ";      
         public const string preset_config_req_channel = "PRESETCONFREQ";
-        public const string preset_move_req_channel = "PRESETMOVEREQ";      
+        public const string preset_move_req_channel = "PRESETMOVEREQ";
+        public const string start_program_req_channel = "STARTPROGRAMREQ";
+        public const string stop_program_req_channel = "STOPPROGRAMREQ";
+        public const string output_req_channel = "OUTPUTREQ";
     }
 }

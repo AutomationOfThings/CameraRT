@@ -12,9 +12,16 @@
 #include "Types\stop_ptz_control_response_t.hpp"
 #include "Types\preset_config_response_t.hpp"
 #include "Types\preset_move_response_t.hpp"
+#include "Types\start_program_response_t.hpp"
+#include "Types\stop_program_response_t.hpp"
+#include "Types\output_request_t.hpp"
 #include "Types\status_codes_t.hpp"
-
+#include "messages.h"
+#include "exceptions.h"
 #include <ppltasks.h>
+#include <chrono>
+#include <thread>
+
 
 using namespace std;
 using namespace concurrency;
@@ -47,7 +54,7 @@ void lcm_handler::on_init_session_req(const lcm::ReceiveBuffer* rbuff,
 		/*config.set_timeout(std::chrono::milliseconds(1000));*/
 
 		http_client* client = new http_client(main_uri, config);
-		std::cout << "Client created...\n";
+		std::cout << lcm_handler::ok_message;
 
 		uri_builder uri = uri_builder(U("/") + uri_constants::stw_cgi).
 			append_path(uri_constants::attributes_cgi).append_path(uri_constants::attributes);
@@ -102,7 +109,7 @@ void lcm_handler::on_init_session_req(const lcm::ReceiveBuffer* rbuff,
 			}				
 
 		})
-			.then([init_session_response, this](wstring response)
+		.then([init_session_response, this](wstring response)
 		{
 			string string_response = this->convert_to_string(response);
 			init_session_response->response_message = string_response;
@@ -377,7 +384,7 @@ void lcm_handler::send_ptz_control_request(ptz_camera::ptz_control_request_t req
 			}
 
 		})
-			.then([control_response, this](wstring response)
+		.then([control_response, this](wstring response)
 		{
 			control_response->response_message =
 				this->convert_to_string(response);
@@ -525,73 +532,82 @@ void lcm_handler::on_position_req(const lcm::ReceiveBuffer* rbuf,
 	else
 	{
 		std::cout << "Client located for ip: " << req->ip_address << std::endl;
-		std::cout << "Building request... ";
+		auto position_task = get_camera_position(ip_client_pair->second);
+		auto response = position_task.get();
+		response.ip_address = req->ip_address;
 
-		uri_builder uri = uri_builder(U("/") + uri_constants::stw_cgi).
-			append_path(uri_constants::ptz_control_cgi);
-
-		uri.append_query(uri_constants::sub_menu, uri_constants::sub_menu_query).
-			append_query(uri_constants::action, uri_constants::action_view).
-			append_query(uri_constants::channel, L"0").
-			append_query(uri_constants::query, L"Pan,Tilt,Zoom");
-
-		auto request = uri.to_string();
-		std::cout << lcm_handler::ok_message;
-		std::cout << "Request: " << convert_to_string(request) << std::endl;
-
-		std::cout << "Sending position request... ";
-		ip_client_pair->second->request(methods::GET, request)
-			.then(
-				[position_response, this](
-					pplx::task<http_response> request_task) -> pplx::task<wstring>
-			{
-				try
-				{
-					auto response = request_task.get();
-					if (response.status_code() == status_codes::OK)
-					{
-						std::cout << lcm_handler::ok_message;
-						position_response->status_code =
-							ptz_camera::status_codes_t::OK;
-					}
-
-					else
-					{
-						std::cout << "GET request to server failed! HTTP Error: "
-							<< response.status_code() << std::endl;
-						position_response->status_code =
-							ptz_camera::status_codes_t::ERR;
-					}
-
-					return response.extract_string();
-				}
-
-				catch (const exception& e)
-				{
-					cout << "Caught exception: " << e.what() << endl;
-					return create_task([e, this]() -> wstring
-					{
-						return this->convert_to_wstring(e.what());
-					});
-				}
-
-			})
-			.then([position_response, this](wstring response)
-			{
-				sun_api::response_parser parser;
-				auto response_map = parser.parse_string(convert_to_string(response));
-				position_response->pan_value = response_map["Pan"];
-				position_response->tilt_value = response_map["Tilt"];
-				position_response->zoom_value = response_map["Zoom"];
-				position_response->response_message = "OK";
-
-				std::cout << "Sending get_position response... ";
-				this->lcm->publish(ptz_camera_res_channels::position_res_channel,
-					position_response.get());
-				std::cout << lcm_handler::ok_message;
-			});
+		this->lcm->publish(ptz_camera_res_channels::position_res_channel, &response);
 	}
 }
+
+pplx::task<ptz_camera::position_response_t> lcm_handler::
+	get_camera_position(http_client* client)
+{
+	auto position_response = make_shared<ptz_camera::position_response_t>();
+	
+	std::cout << "Building request... ";
+	uri_builder uri = uri_builder(U("/") + uri_constants::stw_cgi).
+		append_path(uri_constants::ptz_control_cgi);
+
+	uri.append_query(uri_constants::sub_menu, uri_constants::sub_menu_query).
+		append_query(uri_constants::action, uri_constants::action_view).
+		append_query(uri_constants::channel, L"0").
+		append_query(uri_constants::query, L"Pan,Tilt,Zoom");
+
+
+	auto request = uri.to_string();
+	std::cout << messages::ok_message;
+	std::cout << "Request: " << convert_to_string(request) << std::endl;
+
+	std::cout << "Sending position request... ";
+	return client->request(methods::GET, request)
+		.then(
+			[position_response, this](
+				pplx::task<http_response> request_task) -> pplx::task<wstring>
+	{
+		try
+		{
+			auto response = request_task.get();
+			if (response.status_code() == status_codes::OK)
+			{
+				std::cout << messages::ok_message;
+				position_response->status_code =
+					ptz_camera::status_codes_t::OK;
+			}
+
+			else
+			{
+				std::cout << "GET request to server failed! HTTP Error: "
+					<< response.status_code() << std::endl;
+				position_response->status_code =
+					ptz_camera::status_codes_t::ERR;
+			}
+
+			return response.extract_string();
+		}
+
+		catch (const exception& e)
+		{
+			cout << "Caught exception: " << e.what() << endl;
+			return create_task([e, this]() -> wstring
+			{
+				return this->convert_to_wstring(e.what());
+			});
+		}
+
+	})
+	.then([position_response, this](wstring response) -> ptz_camera::position_response_t
+	{
+		sun_api::response_parser parser;
+		auto response_map = parser.parse_string(convert_to_string(response));
+		position_response->pan_value = response_map["Pan"];
+		position_response->tilt_value = response_map["Tilt"];
+		position_response->zoom_value = response_map["Zoom"];
+		position_response->response_message = "OK";
+		return *position_response.get();
+	});
+}
+
 
 void lcm_handler::on_preset_config_request(const lcm::ReceiveBuffer* rbuf,
 	const std::string& channel,
@@ -793,4 +809,207 @@ void lcm_handler::on_preset_move_request(const lcm::ReceiveBuffer* rbuf,
 			std::cout << lcm_handler::ok_message;
 		});
 	}
+}
+
+void lcm_handler::on_start_program_request(const lcm::ReceiveBuffer* rbuf,
+	const std::string& channel,
+	const ptz_camera::start_program_request_t* req)
+{
+	std::cout << "Received start_program request on channel: " << channel
+		 << std::endl;
+
+	auto start_program_response = make_shared<ptz_camera::start_program_response_t>();
+	auto program_pairs = make_shared<std::queue<std::pair <std::string, std::string> > > ();
+	auto program = make_shared<std::string>();
+
+	*program.get() = req->program;
+
+	create_task([start_program_response, program, program_pairs, this]()
+	{
+		try
+		{
+			*program_pairs = this->parse_program(*(program.get()));
+			std:cout << lcm_handler::ok_message;
+			start_program_response->status_code = ptz_camera::status_codes_t::OK;
+			start_program_response->response_message = "OK";
+			this->lcm->publish(ptz_camera_res_channels::start_program_res_channel, start_program_response.get());
+		}
+		
+		catch (const exception& e)
+		{
+			start_program_response->status_code = ptz_camera::status_codes_t::ERR;
+			start_program_response->response_message = "Error parsing program";
+			this->lcm->publish(ptz_camera_res_channels::start_program_res_channel, start_program_response.get());
+			return;
+		}
+
+		try
+		{
+			this->program_is_executing = true;
+			this->execute_program(program_pairs.get()).wait();
+			this->program_is_executing = false;
+		}
+
+		catch (const exception& e)
+		{
+			this->program_is_executing = false;
+			start_program_response->status_code = ptz_camera::status_codes_t::ERR;
+			start_program_response->response_message = "Error executing program";
+			this->lcm->publish(ptz_camera_res_channels::start_program_res_channel, start_program_response.get());
+			return;
+		}
+
+		std::cout << "Sending program end notification... \n";
+		ptz_camera::output_request_t program_end_request;
+		program_end_request.ip_address = "";
+		this->lcm->publish(ptz_camera_req_channels::output_req_channel, &program_end_request);
+	}, this->program_cts.get_token());
+}
+
+std::queue<std::pair <std::string, std::string> > 
+lcm_handler::parse_program(std::string program_text)
+{
+	std::cout << "Parsing program... \n";
+
+	std::queue<std::pair <std::string, std::string> > program_pairs;
+	std::istringstream is_program(program_text);
+
+	std::string line;	
+	while (std::getline(is_program, line))
+	{
+		std::istringstream is_line(line);
+		std::string key;
+		if (std::getline(is_line, key, '='))
+		{
+			std::string value;
+			if (std::getline(is_line, value))
+			{
+				if (key == "WAIT")
+					program_pairs.push(std::pair<std::string, std::string>("WAIT", value));				
+
+				else if (key == "OUTPUT")
+					program_pairs.push(std::pair<std::string, std::string>("OUTPUT", value));
+
+				else if (key == "PRESET")
+					program_pairs.push(std::pair<std::string, std::string>("PRESET", value));
+
+				else
+				{
+					throw;
+				}
+			}
+		}
+	}
+
+	return program_pairs;
+}
+
+pplx::task<void> lcm_handler::execute_program(std::queue<std::pair <std::string, std::string> >* program)
+{
+	auto program_task = create_task([this, program]()
+	{
+		while ((*program).size() > 0)
+		{
+			if (this->program_cts.get_token().is_canceled())
+				cancel_current_task();
+
+			auto current_pair = (*program).front();
+			(*program).pop();
+
+			if (current_pair.first == "WAIT")
+				this->handle_wait_in_program(current_pair.second);
+
+			if (current_pair.first == "PRESET")
+				this->handle_preset_in_program(current_pair.second);
+
+			if (current_pair.first == "OUTPUT")
+				this->handle_output_in_program(current_pair.second);
+		}
+	}, this->program_cts.get_token());
+
+	return program_task;
+}
+
+
+void lcm_handler::handle_wait_in_program(string value)
+{
+	std::cout << "Waiting for: " << value << std::endl;
+	try 
+	{
+		std::this_thread::sleep_for(std::chrono::milliseconds(atoi(value.c_str())));
+	}
+
+	catch (const exception& e)
+	{
+		throw program_execution_exception("Error executing wait in program: value was" + value);
+	}
+}
+
+void lcm_handler::handle_preset_in_program(string preset_value)
+{
+	std::cout << "Executing preset: " << preset_value << std::endl;
+
+	std::vector<string> preset_vector;
+
+	std::stringstream preset_stream(preset_value);
+
+	string value;
+
+	while (getline(preset_stream, value, ','))
+	{
+		preset_vector.push_back(value);		
+	}
+
+	if (preset_vector.size() != 4)
+		throw program_execution_exception("Error executing \
+			preset in program: value was" + value);
+
+	ptz_camera::ptz_control_request_t ptz_control_request;
+
+	ptz_control_request.mode = ptz_camera::ptz_control_request_t::ABS;
+	ptz_control_request.ip_address = preset_vector[0];
+	ptz_control_request.pan_value = preset_vector[1];
+	ptz_control_request.tilt_value = preset_vector[2];
+	ptz_control_request.zoom_value = preset_vector[3];
+
+	send_ptz_control_request(ptz_control_request);	
+}
+
+void lcm_handler::handle_output_in_program(string value)
+{
+	std::cout << "Switching output to camera: " << value << std::endl;
+
+	auto output_request = make_shared<ptz_camera::output_request_t>();
+
+	output_request->ip_address = value;
+
+	lcm->publish(ptz_camera_req_channels::output_req_channel, output_request.get());
+}
+
+void lcm_handler::handle_unrecognized_key_in_program(string value)
+{
+	std::cout << "Unrecognized key in program: " << value << std::endl;
+}
+
+
+void lcm_handler::on_stop_program_request(const lcm::ReceiveBuffer* rbuf,
+	const std::string& channel,
+	const ptz_camera::stop_program_request_t* req)
+{
+	ptz_camera::stop_program_response_t stop_program_response;
+
+	if (this->program_is_executing)
+	{
+		this->program_cts.cancel();
+		stop_program_response.status_code = ptz_camera::status_codes_t::OK;
+		stop_program_response.response_message = "OK";		
+	}
+
+	else
+	{
+		stop_program_response.status_code = ptz_camera::status_codes_t::ERR;
+		stop_program_response.response_message = "No running program";
+	}
+
+	this->lcm->publish(ptz_camera_res_channels::stop_program_res_channel, &stop_program_response);
 }

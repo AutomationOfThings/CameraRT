@@ -19,6 +19,9 @@
     <Filter Include="SunApiRequestResponseTypes">
       <UniqueIdentifier>{b6673766-0a6f-4b30-bab6-1d7ad2f1208d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Exceptions">
+      <UniqueIdentifier>{1b2e1dab-1a05-4745-abe0-b06f2f921d35}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -111,6 +114,30 @@
     <ClInclude Include="Types\preset_move_response_t.hpp">
       <Filter>RequestResponseTypes</Filter>
     </ClInclude>
+    <ClInclude Include="ptz_cgi_request_response_handler.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="utility_functions.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="messages.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Types\output_request_t.hpp">
+      <Filter>RequestResponseTypes</Filter>
+    </ClInclude>
+    <ClInclude Include="Types\start_program_request_t.hpp">
+      <Filter>RequestResponseTypes</Filter>
+    </ClInclude>
+    <ClInclude Include="Types\start_program_response_t.hpp">
+      <Filter>RequestResponseTypes</Filter>
+    </ClInclude>
+    <ClInclude Include="Types\stop_program_request_t.hpp">
+      <Filter>RequestResponseTypes</Filter>
+    </ClInclude>
+    <ClInclude Include="Types\stop_program_response_t.hpp">
+      <Filter>RequestResponseTypes</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -130,6 +157,15 @@
     </ClCompile>
     <ClCompile Include="udp_broadcaster.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ptz_cgi_request_response_handler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="messages.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="exceptions.h">
+      <Filter>Exceptions</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

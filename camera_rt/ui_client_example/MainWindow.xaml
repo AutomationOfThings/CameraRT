@@ -6,16 +6,17 @@
         xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity" 
         xmlns:local="clr-namespace:ui_client_example"
         mc:Ignorable="d"
-        Title="MainWindow" Height="400" Width="525">
+        Title="MainWindow" Height="600" Width="525">
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="14*"/>
-            <RowDefinition Height="14*"/>
-            <RowDefinition Height="14*"/>
-            <RowDefinition Height="14*"/>
-            <RowDefinition Height="14*"/>
-            <RowDefinition Height="14*"/>
-            <RowDefinition Height="14*"/>
+            <RowDefinition Height="12*"/>
+            <RowDefinition Height="12*"/>
+            <RowDefinition Height="12*"/>
+            <RowDefinition Height="12*"/>
+            <RowDefinition Height="12*"/>
+            <RowDefinition Height="12*"/>
+            <RowDefinition Height="12*"/>
+            <RowDefinition Height="12*"/>
         </Grid.RowDefinitions>
         <StackPanel Orientation="Horizontal"  Margin="14,0">
             <Button Grid.Row="0" Height="40" Width="120" Content="Discover" 
@@ -102,18 +103,35 @@
             </StackPanel>
             <Button Height="40" Width="60" Content="Set Preset" Command="{Binding PresetSetCommand}"  />
             <ScrollViewer VerticalScrollBarVisibility="Visible" Margin="10">
-                <TextBlock Width="100" Text="{Binding PresetSetResponse, Mode=TwoWay}"                       
+                <TextBlock Width="70" Text="{Binding PresetSetResponse, Mode=TwoWay}"                       
                        TextWrapping="Wrap" HorizontalAlignment="Stretch"
                        ScrollViewer.VerticalScrollBarVisibility="Visible"
                        ScrollViewer.CanContentScroll="True" />
             </ScrollViewer>
             <Button Height="40" Width="60" Content="Move" Command="{Binding PresetMoveCommand}"  />
             <ScrollViewer VerticalScrollBarVisibility="Visible" Margin="10">
-                <TextBlock Width="100" Text="{Binding PresetMoveResponse, Mode=TwoWay}"                       
+                <TextBlock Width="80" Text="{Binding PresetMoveResponse, Mode=TwoWay}"                       
+                       TextWrapping="Wrap" HorizontalAlignment="Stretch"
+                       ScrollViewer.VerticalScrollBarVisibility="Visible"
+                       ScrollViewer.CanContentScroll="True" />
+            </ScrollViewer>
+        </StackPanel>
+        
+        <StackPanel Grid.Row="7" Orientation="Horizontal" Margin="14,0">
+            <Button Content="Write Program" Width ="100" Height="40" Command="{Binding WriteProgramCommand}"/>
+            <ScrollViewer VerticalScrollBarVisibility="Visible" Margin="10">
+                <TextBlock Width="80" Text="{Binding StartProgramResponse, Mode=TwoWay}"                       
+                       TextWrapping="Wrap" HorizontalAlignment="Stretch"
+                       ScrollViewer.VerticalScrollBarVisibility="Visible"
+                       ScrollViewer.CanContentScroll="True" />
+            </ScrollViewer>
+            <ScrollViewer VerticalScrollBarVisibility="Visible" Margin="10">
+                <TextBlock Width="80" Text="{Binding OutputRequest, Mode=TwoWay}"                       
                        TextWrapping="Wrap" HorizontalAlignment="Stretch"
                        ScrollViewer.VerticalScrollBarVisibility="Visible"
                        ScrollViewer.CanContentScroll="True" />
             </ScrollViewer>
         </StackPanel>
     </Grid>
+    
 </Window>

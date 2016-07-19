@@ -33,6 +33,8 @@ namespace ui_client_example
         public ICommand StopMoveCommand { get; set; }
         public ICommand PresetSetCommand { get; set; }
         public ICommand PresetMoveCommand { get; set; }
+        public ICommand WriteProgramCommand { get; set; }
+        public ICommand StartProgramCommand { get; set; }
 
         public string CurrentPanValue { get; set; }
         public string CurrentTiltValue { get; set; }
@@ -45,6 +47,8 @@ namespace ui_client_example
         public string Username { get; set; }      
         public string Password { get; set; }
 
+        public string ProgramText { get; set; }
+
         public bool IsContinuousMode { get; set; }
 
         public string InitSessionResponse { get; set; }
@@ -53,6 +57,9 @@ namespace ui_client_example
         public string PresetMoveResponse { get; set; }
         public string PtzControlResponse { get; set; }
 
+        public string StartProgramResponse { get; set; }
+        public string OutputRequest { get; set; }
+
         public string PresetName { get; set; }
         public string PresetNumber { get; set; }
 
@@ -60,7 +67,8 @@ namespace ui_client_example
         public string StreamUri { get; set; }
         public int SelectedCamera { get; set; }
 
-        private LoginDialog _loginDialog; 
+        private LoginDialog _loginDialog;
+        private WriteProgramDialog _writeProgramDialog;
         private readonly LCM.LCM.LCM _lcm;
         private CancellationTokenSource _positionPollerTokenSource = 
             new CancellationTokenSource();
@@ -87,6 +95,8 @@ namespace ui_client_example
             StopMoveCommand = new DelegateCommand(OnStopMoveCommand);
             PresetSetCommand = new DelegateCommand(OnPresetSetCommand);
             PresetMoveCommand = new DelegateCommand(OnPresetMoveCommand);
+            WriteProgramCommand = new DelegateCommand(OnWriteProgramCommand);
+            StartProgramCommand = new DelegateCommand(OnStartProgramCommand);
 
             dynamic app = ui_client_example.App.Current;
             var ea = (EventAggregator)app.EA;
@@ -99,6 +109,41 @@ namespace ui_client_example
             ea.GetEvent<EndSessionResponseReceivedEvent>().Subscribe(OnEndSessionResponseReceived);
             ea.GetEvent<PresetConfigResponseReceivedEvent>().Subscribe(OnPresetConfigResponseReceived);
             ea.GetEvent<PresetMoveResponseReceivedEvent>().Subscribe(OnPresetMoveResponseReceived);
+            ea.GetEvent<StartProgramResponseReceivedEvent>().Subscribe(OnStartProgramResponseReceived);
+            ea.GetEvent<OutputRequestReceivedEvent>().Subscribe(OnOutputRequestReceived);
+        }
+
+        private void OnStartProgramCommand()
+        {
+            var start_program_request = new start_program_request_t()
+            {
+                program = ProgramText
+            };
+
+            _writeProgramDialog.Close();
+            _lcm.Publish(RequestChannelNames.start_program_req_channel, start_program_request);
+        }
+
+        private void OnWriteProgramCommand()
+        {
+            _writeProgramDialog = new WriteProgramDialog();
+            _writeProgramDialog.DataContext = this;
+            _writeProgramDialog.Show();
+        }
+
+        private void OnOutputRequestReceived(output_request_t output_request)
+        {
+            OutputRequest = output_request.ip_address;
+            OnPropertyChanged("OutputRequest");
+        }
+
+        private void OnStartProgramResponseReceived(start_program_response_t start_program_response)
+        {
+            StartProgramResponse = start_program_response.response_message;
+            OnPropertyChanged("StartProgramResponse");
+
+            if (start_program_response.status_code == status_codes_t.ERR)
+                MessageBox.Show(PresetMoveResponse);
         }
 
         private void SubscribeForResponses()
@@ -117,6 +162,9 @@ namespace ui_client_example
             _lcm.Subscribe(ResponseChannelNames.stop_ptz_control_res_channel, new StopPtzControlResponseHandler());
       
             _lcm.Subscribe(ResponseChannelNames.stream_res_channel, new StreamUriResponseHandler());
+
+            _lcm.Subscribe(ResponseChannelNames.start_program_res_channel, new StartProgramResponseHandler());
+            _lcm.Subscribe(RequestChannelNames.output_req_channel, new OutputRequestHandler());
         }
 
         private void OnPresetSetCommand()
@@ -293,22 +341,22 @@ namespace ui_client_example
 
         private void PollCameraPosition(CancellationToken cToken)
         {
-            var positionRequest = new position_request_t()
-            {
-                ip_address = CameraList == null ? "127.0.0.1" : CameraList[SelectedCamera],
-            };
+            //var positionRequest = new position_request_t()
+            //{
+            //    ip_address = CameraList == null ? "127.0.0.1" : CameraList[SelectedCamera],
+            //};
 
-            ActionBlock<position_request_t> pollingBlock = null;
-            pollingBlock = new ActionBlock<position_request_t>(
-                async x =>
-                {
-                    _lcm.Publish(RequestChannelNames.position_req_channel, x);
-                    await Task.Delay(TimeSpan.FromSeconds(5), cToken).
-                        ConfigureAwait(false);
-                    pollingBlock.Post(x); //post the same request again for polling
-                }, new ExecutionDataflowBlockOptions { CancellationToken = cToken });
+            //ActionBlock<position_request_t> pollingBlock = null;
+            //pollingBlock = new ActionBlock<position_request_t>(
+            //    async x =>
+            //    {
+            //        _lcm.Publish(RequestChannelNames.position_req_channel, x);
+            //        await Task.Delay(TimeSpan.FromSeconds(5), cToken).
+            //            ConfigureAwait(false);
+            //        pollingBlock.Post(x); //post the same request again for polling
+            //    }, new ExecutionDataflowBlockOptions { CancellationToken = cToken });
             
-            pollingBlock.Post(positionRequest); //seed and start the poller
+            //pollingBlock.Post(positionRequest); //seed and start the poller
         }
 
         private void OnPanLeftCommand()

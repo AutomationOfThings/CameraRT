@@ -4,8 +4,6 @@
 #include "lcm_handler.h"
 #include "channel_names.h"
 
-
-
 int _tmain(int argc, _TCHAR* argv[])
 {
 	std::cout << " _____                       _____ _____ \n";
@@ -59,6 +57,9 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	lcm.subscribe(ptz_camera_req_channels::preset_move_req_channel,
 		&lcm_handler::on_preset_move_request, &handler);
+
+	lcm.subscribe(ptz_camera_req_channels::start_program_req_channel,
+		&lcm_handler::on_start_program_request, &handler);
 	
 	std::cout << "OK\n";
 
