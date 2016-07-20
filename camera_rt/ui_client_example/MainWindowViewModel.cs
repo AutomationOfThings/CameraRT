@@ -77,7 +77,8 @@ namespace ui_client_example
 
         public MainWindowViewModel()
         {
-            _lcm = new LCM.LCM.LCM("udpm://239.255.76.67:7770");
+            //_lcm = new LCM.LCM.LCM("udpm://239.255.76.67:7770");
+            _lcm = new LCM.LCM.LCM();
 
             SubscribeForResponses();
 
@@ -360,22 +361,22 @@ namespace ui_client_example
 
         private void PollCameraPosition(CancellationToken cToken)
         {
-            //var positionRequest = new position_request_t()
-            //{
-            //    ip_address = CameraList == null ? "127.0.0.1" : CameraList[SelectedCamera],
-            //};
+            var positionRequest = new position_request_t()
+            {
+                ip_address = CameraList == null ? "127.0.0.1" : CameraList[SelectedCamera],
+            };
 
-            //ActionBlock<position_request_t> pollingBlock = null;
-            //pollingBlock = new ActionBlock<position_request_t>(
-            //    async x =>
-            //    {
-            //        _lcm.Publish(RequestChannelNames.position_req_channel, x);
-            //        await Task.Delay(TimeSpan.FromSeconds(5), cToken).
-            //            ConfigureAwait(false);
-            //        pollingBlock.Post(x); //post the same request again for polling
-            //    }, new ExecutionDataflowBlockOptions { CancellationToken = cToken });
-            
-            //pollingBlock.Post(positionRequest); //seed and start the poller
+            ActionBlock<position_request_t> pollingBlock = null;
+            pollingBlock = new ActionBlock<position_request_t>(
+                async x =>
+                {
+                    _lcm.Publish(RequestChannelNames.position_req_channel, x);
+                    await Task.Delay(TimeSpan.FromSeconds(5), cToken).
+                        ConfigureAwait(false);
+                    pollingBlock.Post(x); //post the same request again for polling
+                }, new ExecutionDataflowBlockOptions { CancellationToken = cToken });
+
+            pollingBlock.Post(positionRequest); //seed and start the poller
         }
 
         private void OnPanLeftCommand()
