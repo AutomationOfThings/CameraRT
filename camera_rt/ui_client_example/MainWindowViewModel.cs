@@ -77,8 +77,7 @@ namespace ui_client_example
 
         public MainWindowViewModel()
         {
-
-            _lcm = LCM.LCM.LCM.Singleton;
+            _lcm = new LCM.LCM.LCM("udpm://239.255.76.67:7770");
 
             SubscribeForResponses();
 
