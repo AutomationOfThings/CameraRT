@@ -13,6 +13,7 @@
 #include "Types\start_program_request_t.hpp"
 #include "Types\stop_program_request_t.hpp"
 #include "Types\position_response_t.hpp"
+#include "Types\ptz_control_response_t.hpp"
 
 #include <cpprest\http_client.h>
 #include <cpprest\filestream.h>
@@ -93,8 +94,8 @@ private:
 
 	std::unordered_map <std::string, http_client*> ip_client_map;
 
-	void lcm_handler::send_ptz_control_request
-		(ptz_camera::ptz_control_request_t req);
+	pplx::task<ptz_camera::ptz_control_response_t> lcm_handler::send_ptz_control_request
+		(http_client* client, const ptz_camera::ptz_control_request_t* req);
 
 	pplx::task<ptz_camera::position_response_t> get_camera_position
 		(http_client* client);

@@ -10,9 +10,9 @@ int _tmain(int argc, _TCHAR* argv[])
 	std::cout << "|     |___ _____ ___ ___ ___| __  |_   _|\n";
 	std::cout << "|   --| .'|     | -_|  _| .'|    -| | |  \n";
 	std::cout << "|_____|__,|_|_|_|___|_| |__,|__|__| |_|  \n\n";	
-
-
-	lcm::LCM lcm;
+	
+	auto lcm_config = lcm_create("udpm://239.255.76.67:7770");
+	lcm::LCM lcm(lcm_config);
 
 	std::cout << "Initializing lcm... ";
 
