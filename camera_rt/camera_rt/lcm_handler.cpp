@@ -1043,13 +1043,22 @@ pplx::task<void> lcm_handler::execute_program(std::queue<std::pair <std::string,
 
 task<void> lcm_handler::handle_wait_in_program(std::string* wait_value)
 {
-	return create_task([wait_value]()
+	std::cout << "Waiting for: " << *wait_value << std::endl;
+
+	auto cv = std::make_shared<std::condition_variable>();
+	auto mtx = std::make_shared<std::mutex>(); 
+	
+	auto wait_complete = std::make_shared<bool>(false);
+
+	create_task([this, cv, mtx, wait_complete, wait_value]()
 	{
-		std::cout << "Waiting for: " << *wait_value << std::endl;
 		try
 		{
-			std::this_thread::sleep_for(std::chrono::
-				milliseconds(atoi((*wait_value).c_str())));
+			std::unique_lock<std::mutex> lock(*mtx);
+			auto wait_time = std::chrono::
+				milliseconds(atoi((*wait_value).c_str()));
+			cv->wait_for(lock, wait_time);
+			*wait_complete = true;
 		}
 
 		catch (const exception& e)
@@ -1058,6 +1067,14 @@ task<void> lcm_handler::handle_wait_in_program(std::string* wait_value)
 				"Error executing wait in program: value was" + *wait_value);
 		}
 	}, this->program_cts.get_token());
+
+	while (!*wait_complete)
+	{
+		if(this->program_cts.get_token().is_canceled())
+			cv->notify_all();				
+	}
+
+	return create_task([]() {});
 }
 
 task<void> lcm_handler::handle_preset_in_program(std::vector<std::string>* preset_value)
