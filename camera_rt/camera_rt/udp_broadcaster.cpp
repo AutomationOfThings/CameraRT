@@ -68,7 +68,7 @@ std::vector<SunApiTypes::BroadcastResponsePacket> udp_broadcaster::recv()
 
 	fd_set fds;
 	struct timeval tv;
-	tv.tv_sec = 1;
+	tv.tv_sec = 2;
 	tv.tv_usec = 0;
 
 	FD_ZERO(&fds);
