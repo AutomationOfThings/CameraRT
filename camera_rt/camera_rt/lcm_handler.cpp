@@ -14,6 +14,8 @@
 #include "Types\preset_move_response_t.hpp"
 #include "Types\start_program_response_t.hpp"
 #include "Types\stop_program_response_t.hpp"
+#include "Types\end_program_message_t.hpp"
+#include "Types\program_status_message_t.hpp"
 #include "Types\output_request_t.hpp"
 #include "Types\status_codes_t.hpp"
 #include "messages.h"
@@ -312,7 +314,6 @@ void lcm_handler::on_ptz_conrol_req(const lcm::ReceiveBuffer* rbuf,
 					&control_response);
 				std::cout << lcm_handler::ok_message;
 			});
-
 	}
 }
 
@@ -935,10 +936,9 @@ void lcm_handler::on_start_program_request(const lcm::ReceiveBuffer* rbuf,
 		}				
 
 		std::cout << "Sending program end notification...";
-		ptz_camera::output_request_t program_end_request;
-		program_end_request.ip_address = "";
+		ptz_camera::end_program_message_t program_end_request;		
 		this->lcm->publish(
-			ptz_camera_req_channels::output_req_channel, &program_end_request);
+			ptz_camera_message_channels::end_program_mes_channel, &program_end_request);
 		std::cout << lcm_handler::ok_message;
 	});	
 }
@@ -1018,10 +1018,21 @@ pplx::task<void> lcm_handler::execute_program(std::queue<std::pair <std::string,
 {
 	auto program_task = create_task([this, program]()
 	{
+		auto program_size = (*program).size();
+		ptz_camera::program_status_message_t program_status_message;
+
 		while ((*program).size() > 0)
 		{
 			if (this->program_cts.get_token().is_canceled())
 				cancel_current_task();
+
+			auto program_line = program_size - (*program).size() + 1;
+			program_status_message.line_num = program_line;
+
+			std::cout << "Sending program status message...";
+			this->lcm->publish(ptz_camera_message_channels::program_status_mes_channel, 
+				&program_status_message);
+			std::cout << lcm_handler::ok_message;
 
 			auto current_pair = (*program).front();
 			(*program).pop();

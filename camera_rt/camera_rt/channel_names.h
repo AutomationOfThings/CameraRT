@@ -35,4 +35,10 @@ namespace ptz_camera_res_channels
 	extern const char* stop_program_res_channel;
 };
 
+namespace ptz_camera_message_channels
+{
+	extern const char* program_status_mes_channel;
+	extern const char* end_program_mes_channel;
+}
+
 #endif // ! __ptz_camera_channels__

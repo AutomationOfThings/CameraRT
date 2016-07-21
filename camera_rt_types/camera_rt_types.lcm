@@ -174,3 +174,12 @@ struct output_request_t
 {
 	string ip_address;
 }
+
+struct program_status_message_t
+{
+	int16_t line_num;
+}
+
+struct end_program_message_t
+{
+}

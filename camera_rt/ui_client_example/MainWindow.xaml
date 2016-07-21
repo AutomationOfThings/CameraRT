@@ -126,7 +126,13 @@
                        ScrollViewer.CanContentScroll="True" />
             </ScrollViewer>
             <ScrollViewer VerticalScrollBarVisibility="Visible" Margin="10">
-                <TextBlock Width="80" Text="{Binding OutputRequest, Mode=TwoWay}"                       
+                <TextBlock Width="40" Text="{Binding ProgramLine, Mode=TwoWay}"                       
+                       TextWrapping="Wrap" HorizontalAlignment="Stretch"
+                       ScrollViewer.VerticalScrollBarVisibility="Visible"
+                       ScrollViewer.CanContentScroll="True" />
+            </ScrollViewer>
+            <ScrollViewer VerticalScrollBarVisibility="Visible" Margin="10">
+                <TextBlock Width="40" Text="{Binding OutputRequest, Mode=TwoWay}"                       
                        TextWrapping="Wrap" HorizontalAlignment="Stretch"
                        ScrollViewer.VerticalScrollBarVisibility="Visible"
                        ScrollViewer.CanContentScroll="True" />
