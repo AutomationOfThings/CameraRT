@@ -16,7 +16,7 @@ For example, one of the types defined looks like:
 An executable called lcm-gen.exe shall be used to compile the lcm type into language specific type. 
 All the types that the UI and the runtime are going to use are found in the CameraRT\camera_rt_types\camera_rt_types.lcm file.
 
-Use the lcm-gen.exe tool in the CameraRT\lcm folder to generate C# types as follows:
+You can generate the C# types using the generator tool or you can use the types in the CameraRT\camera_rt\ui_client_example\LCM_Types directory directly. Use the lcm-gen.exe tool in the CameraRT\lcm folder to generate C# types as follows:
 
     lcm-gen.exe --csharp camera_rt_types.lcm
 
@@ -64,32 +64,25 @@ The lcm type discovery_response_t is defined as:
 
     struct discovery_response_t
     {
-        int32_t total_cams;
-        string ip_addresses[total_cams];
-    	int16_t status_code;
-    	string response_message;
+            int32_t total_cams;
+            string ip_addresses[total_cams];
+        	int16_t status_code;
+        	string response_message;
     }
 
-where status_code is like an enum-like field based on the following lcm-type:
-
-    struct status_codes_t
-    {
-    	const int16_t OK=1, ERR=2;
-    }
-
-The response object you will receive thus will have the:
+where: <br> 
 <ul>
     <li>
-    total_cams-- total number of cameras discovered
+    `total_cams`-- total number of cameras discovered
     </li>
     <li>
-    ip_addresses[]-- array with the ip_addresses for the discovered cams
+    `ip_addresses[]`-- array with the ip_addresses for the discovered cams
     </li>
     <li>
-    status_code-- field with ok=1 and error=2 values
+    `status_code`-- enum-like field with OK=1 and ERR=2 values
     </li>
     <li>
-    response_message-- string field with details about the response (generally "OK" for good responses and error message for errors)
+    `response_message`-- string field with details about the response (generally "OK" for good responses and error message for errors)
     </li>
 </ul>
 
@@ -105,7 +98,7 @@ Before you can send any requests to the camera, you will need to send an `init_s
 All the requests supported are here for your reference:
 
         package ptz_camera;
-        
+
         struct discovery_request_t
         {
         }
@@ -182,7 +175,7 @@ All the requests supported are here for your reference:
         struct stop_ptz_control_request_t
         {
         	string ip_address;
-        	const int8_t ALL = 1, PAN = 2, TILT = 3, ZOOM = 4;
+        	const int8_t ALL=1, PAN=2, TILT=3, ZOOM=4;
         	int8_t operation_type;
         }
         
@@ -213,5 +206,88 @@ All the requests supported are here for your reference:
         	int16_t status_code;
         	string response_message;
         }
+        
+        struct preset_config_request_t
+        {
+        	string ip_address;
+        	string preset_name;
+        	string preset_number;
+        	int8_t mode;
+        	const int8_t ADD=1, UDPATE=2, REMOVE=3;
+        	
+        	string pan_value;
+        	string tilt_value;
+        	string zoom_value;	
+        }
+        
+        struct preset_move_request_t
+        {
+        	string ip_address;
+        	string preset_number;
+        }
+        
+        struct preset_config_response_t
+        {
+        	string ip_address;
+        	string preset_number;
+        	int16_t status_code;
+        	string response_message;
+        }
+        
+        struct preset_move_response_t
+        {
+        	string ip_address;
+        	string preset_number;
+        	int16_t status_code;
+        	string response_message;
+        }
+        
+        struct start_program_request_t
+        {
+        	string program;
+        	//SAMPLE
+        	//WAIT=3000
+        	//OUTPUT=192.168.1.206
+        	//PRESET=192.168.1.206,100,50,1
+        	//WAIT=2000
+        	//OUTPUT=192.168.1.211
+        }
+        
+        struct start_program_response_t
+        {
+        	int16_t status_code;
+        	string response_message;
+        }
+        
+        struct stop_program_request_t
+        {
+        }
+        
+        struct stop_program_response_t
+        {
+        	int16_t status_code;
+        	string response_message;
+        }
+        
+        struct output_request_t
+        {
+        	string ip_address;
+        }
+        
+        struct program_status_message_t
+        {
+        	int16_t line_num;
+        }
+        
+        struct end_program_message_t
+        {
+        }  
+        
+       
+       
+        
+       
+     
+        
 
 Please look at the CameraRT\camera_rt\ui_client_example\MainWindowViewModel.cs class for complete samples.
