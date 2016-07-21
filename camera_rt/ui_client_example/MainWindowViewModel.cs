@@ -61,6 +61,7 @@ namespace ui_client_example
         public string StartProgramResponse { get; set; }
         public string StopProgramResponse { get; set; }
         public string OutputRequest { get; set; }
+        public string ProgramLine { get; set; }
 
         public string PresetName { get; set; }
         public string PresetNumber { get; set; }
@@ -115,6 +116,13 @@ namespace ui_client_example
             ea.GetEvent<StartProgramResponseReceivedEvent>().Subscribe(OnStartProgramResponseReceived);
             ea.GetEvent<OutputRequestReceivedEvent>().Subscribe(OnOutputRequestReceived);
             ea.GetEvent<StopProgramResponseReceivedEvent>().Subscribe(OnStopProgramResponseReceived);
+            ea.GetEvent<ProgramStatusMessageReceivedEvent>().Subscribe(OnProgramStatusMessageReceived);
+        }
+
+        private void OnProgramStatusMessageReceived(program_status_message_t program_status_message)
+        {
+            ProgramLine = Convert.ToString(program_status_message.line_num);
+            OnPropertyChanged("ProgramLine");
         }
 
         private void OnStopProgramResponseReceived(stop_program_response_t stop_program_response)
@@ -185,6 +193,7 @@ namespace ui_client_example
             _lcm.Subscribe(ResponseChannelNames.start_program_res_channel, new StartProgramResponseHandler());
             _lcm.Subscribe(RequestChannelNames.output_req_channel, new OutputRequestHandler());
             _lcm.Subscribe(ResponseChannelNames.stop_program_res_channel, new StopProgramResponseHandler());
+            _lcm.Subscribe(MessageChannelNames.program_status_mes_channel, new ProgramStatusMessageHandler());
         }
 
         private void OnPresetSetCommand()

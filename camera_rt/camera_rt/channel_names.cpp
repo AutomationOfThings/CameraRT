@@ -30,3 +30,9 @@ namespace ptz_camera_res_channels
 	const char* start_program_res_channel = "STARTPROGRAMRES";
 	const char* stop_program_res_channel = "STOPPROGRAMRES";
 }
+
+namespace ptz_camera_message_channels
+{
+	const char* program_status_mes_channel = "PROGRAMSTATMES";
+	const char* end_program_mes_channel = "ENDPROGRAMMES";
+}

@@ -138,6 +138,12 @@
     <ClInclude Include="Types\stop_program_response_t.hpp">
       <Filter>RequestResponseTypes</Filter>
     </ClInclude>
+    <ClInclude Include="Types\end_program_message_t.hpp">
+      <Filter>RequestResponseTypes</Filter>
+    </ClInclude>
+    <ClInclude Include="Types\program_status_message_t.hpp">
+      <Filter>RequestResponseTypes</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
